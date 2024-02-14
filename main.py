@@ -1,12 +1,15 @@
 import pygame
 import sys
 import pyautogui
+import random
+import time
 
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (150, 150, 150)
 LIGHT_GRAY = (200, 200, 200)
+RED = (255, 0, 0)
 
 class Button:
     def __init__(self, text, font, x, y, width, height, default_color, hover_color):
@@ -118,6 +121,14 @@ class MenuScene:
         ]
         self.arrange_buttons()
 
+        # Initialize graph line parameters
+        self.graph_line_color = RED
+        self.graph_line_thickness = 2
+        self.graph_line_length = 0
+        self.graph_line_max_length = self.screen.get_width()  # Maximum length of the graph line
+        self.graph_line_y = 0  # Initial y-coordinate of the graph line
+        self.graph_line_speed = 3
+        self.graph_line_points = [(0, self.graph_line_y)] 
     def arrange_buttons(self):
         total_button_height = sum(button.height for button in self.buttons) + (len(self.buttons) - 1) * 20
         y_offset = (self.screen.get_height() - total_button_height) / 2
@@ -127,8 +138,37 @@ class MenuScene:
             y_offset += button.height + 20
             button.rect = pygame.Rect(button.x, button.y, button.width, button.height)
 
+    def update_graph_line(self):
+        # Update graph line parameters for animation
+        self.graph_line_length += self.graph_line_speed
+        # Check if the end of the x-axis is reached
+        if self.graph_line_length >= self.graph_line_max_length:
+            # Reset the graph line
+            self.graph_line_length = 0
+            self.graph_line_y = 0  # Reset y-coordinate to the middle of the screen
+            self.graph_line_points = [(0, self.graph_line_y)]
+        # Calculate the next x-coordinate based on the current length
+        next_x = self.graph_line_length
+        print(self.graph_line_y)
+        # Calculate the next y-coordinate for falling only
+        next_y = self.graph_line_y + random.randint(1, 3)  # Random downward movement
+        self.graph_line_y += next_y - self.graph_line_y
+        # Ensure the y-coordinate stays within the screen boundaries
+        next_y = min(max(next_y, 0), self.screen.get_height() - 1)
+        # If the end of the x-axis is reached, make the line fall to the bottom of the screen
+        if next_x >= self.graph_line_max_length:
+            next_x = self.graph_line_max_length - 1  # Ensure the line reaches the end of x-axis
+            next_y = self.screen.get_height() - 1  # Make the line fall to the bottom of the screen
+
+        # Add the new point to the graph line
+        self.graph_line_points.append((next_x, next_y))
+    def draw_graph_line(self):
+       
+        pygame.draw.lines(self.screen, self.graph_line_color, False, self.graph_line_points, self.graph_line_thickness)
+
     def run(self):
         while True:
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -136,8 +176,14 @@ class MenuScene:
                 for button in self.buttons:
                     button.update(event)
 
+            # Update graph line
+            self.update_graph_line()
+
             # Fill the screen with black
             self.screen.fill(BLACK)
+
+            # Draw the animated graph line
+            self.draw_graph_line()
 
             # Draw buttons
             for button in self.buttons:
@@ -163,8 +209,8 @@ def main():
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
 
     # Loading scene
-    loading_scene = LoadingScene(screen, "screenshot.png")
-    loading_scene.run()
+    #loading_scene = LoadingScene(screen, "screenshot.png")
+    #loading_scene.run()
 
     # Menu scene
     menu_scene = MenuScene(screen)
