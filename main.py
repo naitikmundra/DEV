@@ -191,17 +191,20 @@ class MenuScene:
             clock.tick(30)
 
 class Particle(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,ax,ay):
         super().__init__()
         self.image = pygame.Surface((5, 5))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed_x = random.uniform(-0.5, 0.5)  # Random horizontal speed
+        self.speed_x = random.uniform(-0.1, 0.1)  # Random horizontal speed
         self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
         self.gravity = 2  # Gravity to simulate downward acceleration
         self.max_speed_y = 10  # Maximum vertical speed
-        self.sideways_drift = random.uniform(-0.2, 0.2)  # Initial sideways drift
-
+        self.sideways_drift = random.uniform(-0.07, 0.07)  # Initial sideways drift
+        self.max_x_speed = 0.01  # Maximum speed on the x-axis
+        self.sideways_drift_limit = 0.5  # Limit for sideways drift
+        self.ax = ax
+        self.ay = ay
     def update(self, screen):
         if self.speed_y > 0:  # If moving upwards
             self.speed_y -= self.gravity  # Apply gravity
@@ -212,12 +215,28 @@ class Particle(pygame.sprite.Sprite):
             self.speed_y += self.gravity  # Apply gravity
             self.speed_y = min(self.speed_y, self.max_speed_y)  # Limit maximum vertical speed
             self.speed_x *= 0.99  # Apply air resistance to horizontal speed
-
+        if self.rect.y > self.ay + 400:
+            self.kill()
+        if self.rect.x > self.ax+ 150:
+            self.sideways_drift =0
+            if self.speed_x >0:
+                self.speed_x -=0.05
+        if self.rect.x < self.ax- 100:
+            self.sideways_drift =0
+            if self.speed_x <0:
+                self.speed_x +=0.05
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
+
+        # Check if particle hits the sides of the screen and reverse its direction
+        if self.rect.left <= 0 or self.rect.right >= screen.get_width():
+            self.speed_x *= -1
+
         if self.rect.bottom >= screen.get_height() - 50:
             self.speed_y = -1
             self.gravity = -0.01
+
+
 '''
         # Check collision with ground
         if self.rect.bottom >= screen.get_height() - 50:
@@ -303,7 +322,7 @@ class GameScene:
         if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
             for _ in range(10):  # Emit 20 particles at once
                 particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
-                                    self.rocket_y + self.rocket_height)
+                                    self.rocket_y + self.rocket_height, self.rocket_x, self.rocket_y)
                 self.particles.add(particle)
             self.emit_timer = now  # Reset emit timer
 
