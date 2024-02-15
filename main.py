@@ -215,8 +215,12 @@ class Particle(pygame.sprite.Sprite):
             self.speed_y += self.gravity  # Apply gravity
             self.speed_y = min(self.speed_y, self.max_speed_y)  # Limit maximum vertical speed
             self.speed_x *= 0.99  # Apply air resistance to horizontal speed
+        #despawn particles once it reaches far from rocket
         if self.rect.y > self.ay + 400:
             self.kill()
+        if self.rect.x > self.ax + 200 or self.rect.x < self.ax - 150:
+            self.kill()
+        #setting limit on how much particles can travel on x-axis 
         if self.rect.x > self.ax+ random.uniform(50,150):
             self.sideways_drift =0
             if self.speed_x >0:
@@ -225,6 +229,7 @@ class Particle(pygame.sprite.Sprite):
             self.sideways_drift =0
             if self.speed_x <0:
                 self.speed_x +=0.05
+        
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
@@ -233,9 +238,15 @@ class Particle(pygame.sprite.Sprite):
             self.speed_x *= -1
 
         if self.rect.bottom >= screen.get_height() - 50:
-            self.speed_y = -1
+            self.kill()
+'''
+            self.speed_y = -0.2
+            if self.speed_x >0:
+                self.speed_x += 0.13
+            if self.speed_x <0:
+                self.speed_x -= 0.13
             self.gravity = -0.01
-
+'''
 
 '''
         # Check collision with ground
@@ -254,7 +265,7 @@ class GameScene:
         self.rocket_width = 50
         self.rocket_height = 100
         self.rocket_x = (screen.get_width() - self.rocket_width) / 2
-        self.rocket_y = screen.get_height() - self.rocket_height - 500  # Place rocket above ground level
+        self.rocket_y = screen.get_height() - self.rocket_height - 100  # Place rocket above ground level
 
         self.rocket_on = False  # Flag to indicate if the rocket is turned on
         self.rocket_on_indicator_radius = 5  # Radius of the indicator circle
