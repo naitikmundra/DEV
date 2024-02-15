@@ -117,7 +117,10 @@ class MenuScene:
             Button("Quit", self.font, 0, 0, 200, 50, GRAY, LIGHT_GRAY)
         ]
         self.arrange_buttons()
-
+        self.blur_amount = 10  # Adjust the blur amount as needed
+        self.shutter_height = 100
+        self.shutter_speed = 25
+        self.shutter_pos = -self.shutter_height 
     def arrange_buttons(self):
         total_button_height = sum(button.height for button in self.buttons) + (len(self.buttons) - 1) * 20
         y_offset = (self.screen.get_height() - total_button_height) / 2
@@ -132,7 +135,7 @@ class MenuScene:
         for y in range(0, self.screen.get_height(), 5):
             for x in range(0, self.screen.get_width(), 5):
                 if random.random() < 0.1:  # Adjust the density of static
-                    color = GRAY if random.random() < 0.5 else LIGHT_GRAY
+                    color = BLACK if random.random() < 0.5 else LIGHT_GRAY
                     pygame.draw.rect(self.screen, color, (x, y, 5, 5))
         
         # Draw broken screen-like lines (vertical)
@@ -146,6 +149,12 @@ class MenuScene:
             end_x += random.randint(-20, 20)    # Randomly move the line to the left or right
             pygame.draw.line(self.screen, color, (start_x, start_y), (end_x, end_y), random.randint(1, 3))  # Adjust line thickness
         
+        # Draw rolling shutter effect
+        self.shutter_pos += self.shutter_speed
+        if self.shutter_pos >= self.screen.get_height():
+            self.shutter_pos = -self.shutter_height
+        pygame.draw.rect(self.screen, WHITE, (0, self.shutter_pos, self.screen.get_width(), self.shutter_height))
+
         # Draw blinking error message
         error_font = pygame.font.Font(None, 40)
         error_text = error_font.render("Error: System malfunction", True, (255, 0, 0))
@@ -153,6 +162,8 @@ class MenuScene:
         error_rect.topleft = (50, 50)
         if pygame.time.get_ticks() % 1000 < 500:  # Make the text blink every 500 milliseconds
             self.screen.blit(error_text, error_rect)
+
+
 
 
     def run(self):
