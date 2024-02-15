@@ -2,7 +2,6 @@ import pygame
 import sys
 import pyautogui
 import random
-import math
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -106,95 +105,64 @@ class LoadingScene:
 
 
 
+
+
+class Star:
+    def __init__(self, x, y, speed):
+        self.x = x
+        self.y = y
+        self.speed = speed
+
+    def move(self):
+        self.y -= self.speed
+
 class MenuScene:
     def __init__(self, screen):
         self.screen = screen
         self.font = pygame.font.Font(None, 36)
         self.buttons = [
-            Button("New Game", self.font, 0, 0, 200, 50, GRAY, LIGHT_GRAY),
+            Button("Play", self.font, 0, 0, 200, 50, GRAY, LIGHT_GRAY),
             Button("Options", self.font, 0, 0, 200, 50, GRAY, LIGHT_GRAY),
             Button("Quit", self.font, 0, 0, 200, 50, GRAY, LIGHT_GRAY)
         ]
+        self.num_stars = 50
+        self.star_speed_min = 1
+        self.star_speed_max = 5
+        self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
         self.arrange_buttons()
-        self.blur_amount = 10  # Adjust the blur amount as needed
-        self.shutter_height = 100
-        self.shutter_speed = 25
-        self.shutter_pos = -self.shutter_height 
 
-        # Create a smaller surface for rendering the effects
-        self.xyz_surface = pygame.Surface((600, 400))  # Adjust the size as needed
-        self.xyz_surface.fill(BLACK)
+    def create_stars(self, num_stars, min_speed, max_speed):
+        stars = []
+        for _ in range(num_stars):
+            x = random.randint(0, self.screen.get_width())
+            y = random.randint(0, self.screen.get_height())
+            speed = random.randint(min_speed, max_speed)
+            stars.append(Star(x, y, speed))
+        return stars
 
-        # Chain parameters
-        self.chain_length = 200  # Length of the chain
-        self.chain_color = (150, 150, 150)  # Color of the chain
-        self.chain_thickness = 3  # Thickness of the chain
-        self.chain_angle = 33  # Initial angle of the swinging chain
-        self.chain_rotation_speed = 0.005  # Speed of rotation
-        self.chain_origin_x = self.screen.get_width() // 2  # X coordinate of the chain's attachment point (middle of the screen)
-        self.chain_origin_y = 0  # Y coordinate of the chain's attachment point
-        self.chain_amplitude = 300  # Amplitude of the swinging motion
-        self.chain_swing_speed = 0.001  # Speed of swinging
-        self.xyz_pos = (self.chain_origin_x - self.xyz_surface.get_width() // 2, self.chain_origin_y - self.xyz_surface.get_height())  # Position of the XYZ monitor
+    def move_stars(self):
+        for star in self.stars:
+            star.move()
+            if star.y < -10:  # If star moves out of screen, reset its position
+                star.y = self.screen.get_height() + 10
+                star.x = random.randint(0, self.screen.get_width())
+
+    def draw_stars(self):
+        for star in self.stars:
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 2)
+
 
     def arrange_buttons(self):
         total_button_height = sum(button.height for button in self.buttons) + (len(self.buttons) - 1) * 20
-        y_offset = (self.screen.get_height() - total_button_height) / 2
+        y_offset = (self.screen.get_height() - total_button_height) / 1.1 # Shifted buttons lower by 50 pixels
         for button in self.buttons:
             button.x = (self.screen.get_width() - button.width) / 2
             button.y = y_offset
             y_offset += button.height + 20
             button.rect = pygame.Rect(button.x, button.y, button.width, button.height)
 
-    def draw_tv_static(self):
-        # Draw TV static effect with reduced brightness
-        for y in range(0, self.xyz_surface.get_height(), 5):
-            for x in range(0, self.xyz_surface.get_width(), 5):
-                if random.random() < 0.1:  # Adjust the density of static
-                    color = BLACK if random.random() < 0.5 else LIGHT_GRAY
-                    pygame.draw.rect(self.xyz_surface, color, (x, y, 5, 5))
-        
-        # Draw broken screen-like lines (vertical)
-        for _ in range(10):  # Adjust the number of lines as needed
-            color = random.choice([(255, 0, 0), (0, 255, 255), (255, 0, 255)])  # Choose from different colors
-            start_x = random.randint(self.xyz_surface.get_width() * 9 // 10, self.xyz_surface.get_width() - 50)
-            end_x = start_x  # Ensure the line is straight by keeping the x-coordinate the same
-            start_y = 0
-            end_y = self.xyz_surface.get_height()
-            start_x += random.randint(-20, 20)  # Randomly move the line to the left or right
-            end_x += random.randint(-20, 20)    # Randomly move the line to the left or right
-            pygame.draw.line(self.xyz_surface, color, (start_x, start_y), (end_x, end_y), random.randint(1, 3))  # Adjust line thickness
-        
-        # Draw rolling shutter effect
-        self.shutter_pos += self.shutter_speed
-        if self.shutter_pos >= self.xyz_surface.get_height():
-            self.shutter_pos = -self.shutter_height
-        pygame.draw.rect(self.xyz_surface, WHITE, (0, self.shutter_pos, self.xyz_surface.get_width(), self.shutter_height))
-
-        # Draw blinking error message
-        error_font = pygame.font.Font(None, 40)
-        error_text = error_font.render("Error: System malfunction", True, (255, 0, 0))
-        error_rect = error_text.get_rect()
-        error_rect.topleft = (50, 50)
-        if pygame.time.get_ticks() % 1000 < 500:  # Make the text blink every 500 milliseconds
-            self.xyz_surface.blit(error_text, error_rect)
-
-    def draw_swinging_chain(self):
-        # Update chain angle
-        self.chain_angle += self.chain_rotation_speed
-
-        # Calculate swinging motion
-        offset = self.chain_amplitude * math.sin(self.chain_swing_speed * pygame.time.get_ticks())
-        swing_x = self.chain_origin_x + offset
-        swing_y = self.chain_origin_y + self.chain_length
-
-        # Draw chain
-        pygame.draw.line(self.screen, self.chain_color, (swing_x, swing_y), (swing_x, swing_y - self.chain_length), self.chain_thickness)
-
-        # Update XYZ monitor position
-        self.xyz_pos = (swing_x - self.xyz_surface.get_width() // 2, swing_y)  # Adjusted to align with the chain
-
     def run(self):
+        clock = pygame.time.Clock()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -203,23 +171,18 @@ class MenuScene:
                 for button in self.buttons:
                     button.update(event)
 
-            # Draw black background
+            # Move and draw stars
+            self.move_stars()
             self.screen.fill(BLACK)
+            self.draw_stars()
 
-
-
-            # Draw XYZ rectangle with effects
-            self.draw_tv_static()
-            self.screen.blit(self.xyz_surface, self.xyz_pos)
-            # Draw swinging chain
-            self.draw_swinging_chain()
             # Draw buttons
             for button in self.buttons:
                 button.draw(self.screen)
 
             # Update the display
             pygame.display.flip()
-
+            clock.tick(30)
 
 def main():
     # Take a screenshot and save it to a file
