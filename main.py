@@ -198,8 +198,8 @@ class Particle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.speed_x = random.uniform(-0.5, 0.5)  # Random horizontal speed
         self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
-        self.gravity = 0.05  # Gravity to simulate downward acceleration
-        self.max_speed_y = 5  # Maximum vertical speed
+        self.gravity = 2  # Gravity to simulate downward acceleration
+        self.max_speed_y = 10  # Maximum vertical speed
         self.sideways_drift = random.uniform(-0.2, 0.2)  # Initial sideways drift
 
     def update(self, screen):
@@ -215,14 +215,17 @@ class Particle(pygame.sprite.Sprite):
 
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
-
+        if self.rect.bottom >= screen.get_height() - 50:
+            self.speed_y = -1
+            self.gravity = -0.01
+'''
         # Check collision with ground
         if self.rect.bottom >= screen.get_height() - 50:
             self.speed_x *= 0.95  # Reduce horizontal speed on collision
             self.speed_x += random.uniform(-0.1, 0.1)  # Add randomness to horizontal speed
             self.speed_y = -self.speed_y * 0.5  # Reverse and reduce vertical speed
             self.rect.bottom = screen.get_height() - 50  # Adjust position to ground level
-  # Adjust position to ground
+  # Adjust position to ground'''
 class GameScene:
     def __init__(self, screen):
         self.screen = screen
@@ -232,7 +235,7 @@ class GameScene:
         self.rocket_width = 50
         self.rocket_height = 100
         self.rocket_x = (screen.get_width() - self.rocket_width) / 2
-        self.rocket_y = screen.get_height() - self.rocket_height - 100  # Place rocket above ground level
+        self.rocket_y = screen.get_height() - self.rocket_height - 90  # Place rocket above ground level
 
         self.rocket_on = False  # Flag to indicate if the rocket is turned on
         self.rocket_on_indicator_radius = 5  # Radius of the indicator circle
@@ -241,8 +244,7 @@ class GameScene:
 
         self.particles = pygame.sprite.Group()  # Group to store particles
         self.particle_emit = False
-        self.emit_timer = 0
-        self.emit_duration = 5000  # 5 seconds in milliseconds
+         # 5 seconds in milliseconds
 
         self.num_stars = 50
         self.star_speed_min = 1
