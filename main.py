@@ -7,6 +7,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (150, 150, 150)
 LIGHT_GRAY = (200, 200, 200)
+YELLOW = (255, 255, 0)
 
 class Button:
     def __init__(self, text, font, x, y, width, height, default_color, hover_color):
@@ -188,24 +189,150 @@ class MenuScene:
             # Update the display
             pygame.display.flip()
             clock.tick(30)
+
+class Particle(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((5, 5))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed_x = random.uniform(-0.5, 0.5)  # Random horizontal speed
+        self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
+        self.gravity = 0.05  # Gravity to simulate downward acceleration
+        self.max_speed_y = 5  # Maximum vertical speed
+        self.sideways_drift = random.uniform(-0.2, 0.2)  # Initial sideways drift
+
+    def update(self, screen):
+        if self.speed_y > 0:  # If moving upwards
+            self.speed_y -= self.gravity  # Apply gravity
+            self.speed_y = max(self.speed_y, 0)  # Stop upward motion at 0
+            self.speed_x += self.sideways_drift  # Add sideways drift
+
+        else:  # If moving downwards
+            self.speed_y += self.gravity  # Apply gravity
+            self.speed_y = min(self.speed_y, self.max_speed_y)  # Limit maximum vertical speed
+            self.speed_x *= 0.99  # Apply air resistance to horizontal speed
+
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
+
+        # Check collision with ground
+        if self.rect.bottom >= screen.get_height() - 50:
+            self.speed_x *= 0.95  # Reduce horizontal speed on collision
+            self.speed_x += random.uniform(-0.1, 0.1)  # Add randomness to horizontal speed
+            self.speed_y = -self.speed_y * 0.5  # Reverse and reduce vertical speed
+            self.rect.bottom = screen.get_height() - 50  # Adjust position to ground level
+  # Adjust position to ground
 class GameScene:
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
+        self.ground_color = WHITE
+        self.rocket_color = (50, 50, 50)  # Dark gray color
+        self.rocket_width = 50
+        self.rocket_height = 100
+        self.rocket_x = (screen.get_width() - self.rocket_width) / 2
+        self.rocket_y = screen.get_height() - self.rocket_height - 100  # Place rocket above ground level
+
+        self.rocket_on = False  # Flag to indicate if the rocket is turned on
+        self.rocket_on_indicator_radius = 5  # Radius of the indicator circle
+        self.rocket_on_indicator_color = (255, 0, 0)  # Red color
+        self.rocket_on_indicator_pos = (20, 20)  # Position of the indicator circle
+
+        self.particles = pygame.sprite.Group()  # Group to store particles
+        self.particle_emit = False
+        self.emit_timer = 0
+        self.emit_duration = 5000  # 5 seconds in milliseconds
+
+        self.num_stars = 50
+        self.star_speed_min = 1
+        self.star_speed_max = 5
+        self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
+        self.emit_timer = 0
+        self.emit_interval = 20  # Emit particles every 20 milliseconds
+    def create_stars(self, num_stars, min_speed, max_speed):
+        stars = []
+        for _ in range(num_stars):
+            x = random.randint(0, self.screen.get_width())
+            y = random.randint(0, self.screen.get_height())
+            speed = random.randint(min_speed, max_speed)
+            stars.append(Star(x, y, speed))
+        return stars
+
+    def move_stars(self):
+        for star in self.stars:
+            star.move()
+            if star.y < -10:  # If star moves out of screen, reset its position
+                star.y = self.screen.get_height() + 10
+                star.x = random.randint(0, self.screen.get_width())
+
+    def draw_stars(self):
+        for star in self.stars:
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 2)
+
+    def draw_ground(self):
+        pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - 50, self.screen.get_width(), 50))
+
+    def draw_rocket(self):
+        pygame.draw.rect(self.screen, self.rocket_color, (self.rocket_x, self.rocket_y, self.rocket_width, self.rocket_height))
+
+    def draw_rocket_on_indicator(self):
+        if self.rocket_on:
+            pygame.draw.circle(self.screen, self.rocket_on_indicator_color, self.rocket_on_indicator_pos, self.rocket_on_indicator_radius)
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_e:
+                    self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
+                    if self.rocket_on:
+                        self.emit_timer = pygame.time.get_ticks()  # Start emit timer
+                elif event.key == pygame.K_w:
+                    self.particle_emit = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    self.particle_emit = False
+
+    def emit_particles(self):
+        now = pygame.time.get_ticks()
+        if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
+            particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
+                                self.rocket_y + self.rocket_height)
+            self.particles.add(particle)
+            self.emit_timer = now  # Reset emit timer
 
     def run(self):
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+            self.handle_events()
 
             # Fill the screen with black
             self.screen.fill(BLACK)
 
+            # Move and draw stars
+            self.move_stars()
+            self.draw_stars()
+
+            # Draw ground and rocket
+            self.draw_ground()
+            self.draw_rocket()
+
+            # Draw rocket on indicator
+            self.draw_rocket_on_indicator()
+
+            # Emit particles if necessary
+            self.emit_particles()
+
+            # Update and draw particles
+            self.particles.update(self.screen)
+            self.particles.draw(self.screen)
+
             # Update the display
             pygame.display.flip()
             self.clock.tick(30)
+
             
 def main():
     # Take a screenshot and save it to a file
