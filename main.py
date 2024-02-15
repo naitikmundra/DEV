@@ -217,11 +217,11 @@ class Particle(pygame.sprite.Sprite):
             self.speed_x *= 0.99  # Apply air resistance to horizontal speed
         if self.rect.y > self.ay + 400:
             self.kill()
-        if self.rect.x > self.ax+ 150:
+        if self.rect.x > self.ax+ random.uniform(50,150):
             self.sideways_drift =0
             if self.speed_x >0:
                 self.speed_x -=0.05
-        if self.rect.x < self.ax- 100:
+        if self.rect.x < self.ax- random.uniform(10,100):
             self.sideways_drift =0
             if self.speed_x <0:
                 self.speed_x +=0.05
