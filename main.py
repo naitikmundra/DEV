@@ -235,7 +235,7 @@ class GameScene:
         self.rocket_width = 50
         self.rocket_height = 100
         self.rocket_x = (screen.get_width() - self.rocket_width) / 2
-        self.rocket_y = screen.get_height() - self.rocket_height - 90  # Place rocket above ground level
+        self.rocket_y = screen.get_height() - self.rocket_height - 500  # Place rocket above ground level
 
         self.rocket_on = False  # Flag to indicate if the rocket is turned on
         self.rocket_on_indicator_radius = 5  # Radius of the indicator circle
@@ -301,9 +301,10 @@ class GameScene:
     def emit_particles(self):
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
-            particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
-                                self.rocket_y + self.rocket_height)
-            self.particles.add(particle)
+            for _ in range(10):  # Emit 20 particles at once
+                particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
+                                    self.rocket_y + self.rocket_height)
+                self.particles.add(particle)
             self.emit_timer = now  # Reset emit timer
 
     def run(self):
