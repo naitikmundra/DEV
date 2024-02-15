@@ -170,6 +170,11 @@ class MenuScene:
                     sys.exit()
                 for button in self.buttons:
                     button.update(event)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    for button in self.buttons:
+                        if button.rect.collidepoint(event.pos) and button.text == "Play":
+                            game_scene = GameScene(self.screen)
+                            game_scene.run()
 
             # Move and draw stars
             self.move_stars()
@@ -183,7 +188,25 @@ class MenuScene:
             # Update the display
             pygame.display.flip()
             clock.tick(30)
+class GameScene:
+    def __init__(self, screen):
+        self.screen = screen
+        self.clock = pygame.time.Clock()
 
+    def run(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            # Fill the screen with black
+            self.screen.fill(BLACK)
+
+            # Update the display
+            pygame.display.flip()
+            self.clock.tick(30)
+            
 def main():
     # Take a screenshot and save it to a file
     screenshot = pyautogui.screenshot()
