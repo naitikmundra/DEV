@@ -129,12 +129,12 @@ class MenuScene:
         self.chain_length = 200  # Length of the chain
         self.chain_color = (150, 150, 150)  # Color of the chain
         self.chain_thickness = 3  # Thickness of the chain
-        self.chain_angle = 0  # Initial angle of the swinging chain
+        self.chain_angle = 33  # Initial angle of the swinging chain
         self.chain_rotation_speed = 0.005  # Speed of rotation
         self.chain_origin_x = self.screen.get_width() // 2  # X coordinate of the chain's attachment point (middle of the screen)
         self.chain_origin_y = 0  # Y coordinate of the chain's attachment point
-        self.chain_amplitude = 20  # Amplitude of the swinging motion
-        self.chain_swing_speed = 0.005  # Speed of swinging
+        self.chain_amplitude = 300  # Amplitude of the swinging motion
+        self.chain_swing_speed = 0.001  # Speed of swinging
         self.xyz_pos = (self.chain_origin_x - self.xyz_surface.get_width() // 2, self.chain_origin_y - self.xyz_surface.get_height())  # Position of the XYZ monitor
 
     def arrange_buttons(self):
