@@ -316,6 +316,10 @@ class GameScene:
             if self.rocket_moving_up:
                 star.rocket = True
                 star.speed = self.rocket_velocity
+            else:
+                if self.rocket_velocity < 0:
+                    star.rocket = False
+                    star.speed = -self.rocket_velocity
             if self.rocket_y < self.screen.get_height() - 350:
                 
                 self.rocket_abovethreshold = True
