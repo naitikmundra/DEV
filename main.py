@@ -294,6 +294,8 @@ class GameScene:
         self.rocket_velocity = 0  # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
+        self.power_on = pygame.mixer.Sound("power.mp3")
+        self.power_on2 = pygame.mixer.Sound("switch.mp3")
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -331,9 +333,12 @@ class GameScene:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
+                    self.power_on2.play()
                     if self.rocket_on:
                         if self.rocket_velocity != 0:
                              self.rocket_moving_up = False
+                    else:
+                        self.power_on.play()
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
                     
                 elif event.key == pygame.K_w and self.rocket_on:
