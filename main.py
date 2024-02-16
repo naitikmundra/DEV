@@ -200,7 +200,7 @@ class Particle(pygame.sprite.Sprite):
         self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
         self.gravity = 2  # Gravity to simulate downward acceleration
         self.max_speed_y = 10  # Maximum vertical speed
-        self.sideways_drift = random.uniform(-0.07, 0.07)  # Initial sideways drift
+        self.sideways_drift = random.uniform(-0.09, 0.09)  # Initial sideways drift
         self.max_x_speed = 0.01  # Maximum speed on the x-axis
         self.sideways_drift_limit = 0.5  # Limit for sideways drift
         self.ax = ax
@@ -232,13 +232,18 @@ class Particle(pygame.sprite.Sprite):
         
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
-
+        self.check_hit_ground(screen)
         # Check if particle hits the sides of the screen and reverse its direction
         if self.rect.left <= 0 or self.rect.right >= screen.get_width():
             self.speed_x *= -1
 
         if self.rect.bottom >= screen.get_height() - 50:
             self.kill()
+    def check_hit_ground(self, screen):
+        
+        if self.rect.bottom >= screen.get_height() - 100:
+            # Notify the GameScene class when a particle hits the ground
+            return True
 '''
             self.speed_y = -0.2
             if self.speed_x >0:
@@ -256,6 +261,7 @@ class Particle(pygame.sprite.Sprite):
             self.speed_y = -self.speed_y * 0.5  # Reverse and reduce vertical speed
             self.rect.bottom = screen.get_height() - 50  # Adjust position to ground level
   # Adjust position to ground'''
+
 class GameScene:
     def __init__(self, screen):
         self.screen = screen
@@ -282,6 +288,11 @@ class GameScene:
         self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
         self.emit_timer = 0
         self.emit_interval = 20  # Emit particles every 20 milliseconds
+        self.particles_hit_ground = 0  # Track the number of particles hitting the ground
+        self.rocket_speed = 5  # Define the speed at which the rocket moves upwards
+        self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
+        self.rocket_velocity = 0  # Initial velocity
+        self.acceleration = 0.1  # Acceleration rate
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -324,22 +335,45 @@ class GameScene:
                         self.emit_timer = pygame.time.get_ticks()  # Start emit timer
                 elif event.key == pygame.K_w:
                     self.particle_emit = True
+                    self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     self.particle_emit = False
+                    self.rocket_moving_up = False  # Stop moving the rocket
 
+    def update(self):
+        # Check if a thousand particles hit the ground
+        if self.particles_hit_ground >= 100000:
+            
+            # Move the rocket upwards continuously while "W" is held down
+            if self.rocket_moving_up:
+                # Increase rocket velocity gradually
+                self.rocket_velocity += self.acceleration
+
+                # Move the rocket based on its velocity
+                self.rocket_y -= self.rocket_velocity
+            # Stop moving the rocket upwards if it reaches the top
+            if self.rocket_y <= 0:
+                self.rocket_moving_up = False
     def emit_particles(self):
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
-            for _ in range(10):  # Emit 20 particles at once
+            for _ in range(20):  # Emit 20 particles at once
                 particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
                                     self.rocket_y + self.rocket_height, self.rocket_x, self.rocket_y)
                 self.particles.add(particle)
             self.emit_timer = now  # Reset emit timer
-
+        
+        for particle in self.particles:
+            
+            if particle.check_hit_ground(self.screen):
+                
+                self.particles_hit_ground += 1
+                
     def run(self):
         while True:
             self.handle_events()
+            self.update()
 
             # Fill the screen with black
             self.screen.fill(BLACK)
