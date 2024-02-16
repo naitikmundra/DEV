@@ -291,11 +291,11 @@ class GameScene:
 
         self.num_stars = 50
         self.star_speed_min = 1
-        self.star_speed_max = 100
+        self.star_speed_max = 5
         self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
-        self.rocket_velocity = 0  # Initial velocity
+        self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.power_on = pygame.mixer.Sound("power.mp3")
@@ -313,10 +313,14 @@ class GameScene:
     def move_stars(self):
         for star in self.stars:
             star.move()
-            if self.rocket_y < self.screen.get_height() - 350:
+            if self.rocket_moving_up:
                 star.rocket = True
-                self.rocket_abovethreshold = True
                 star.speed = self.rocket_velocity
+            if self.rocket_y < self.screen.get_height() - 350:
+                
+                self.rocket_abovethreshold = True
+                
+            
             if star.y < -10:  # If star moves out of screen, reset its position
                 star.y = self.screen.get_height() + 10
                 star.x = random.randint(0, self.screen.get_width())
