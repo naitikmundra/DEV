@@ -109,13 +109,17 @@ class LoadingScene:
 
 
 class Star:
-    def __init__(self, x, y, speed):
+    def __init__(self, x, y, speed, rocket=False):
         self.x = x
         self.y = y
         self.speed = speed
+        self.rocket = rocket
 
     def move(self):
+     if not self.rocket:
         self.y -= self.speed
+     else:
+        self.y += self.speed
 
 class MenuScene:
     def __init__(self, screen):
@@ -219,7 +223,7 @@ class Particle(pygame.sprite.Sprite):
             self.speed_x *= 0.99  # Apply air resistance to horizontal speed
         #despawn particles once it reaches far from rocket
         
-        if self.rect.y > self.ay + 200:
+        if self.rect.y > self.ay + 300:
             self.kill()
         if self.rect.x > self.ax + 200 or self.rect.x < self.ax - 150:
             self.kill()
@@ -287,7 +291,7 @@ class GameScene:
 
         self.num_stars = 50
         self.star_speed_min = 1
-        self.star_speed_max = 5
+        self.star_speed_max = 100
         self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
@@ -296,6 +300,7 @@ class GameScene:
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.power_on = pygame.mixer.Sound("power.mp3")
         self.power_on2 = pygame.mixer.Sound("switch.mp3")
+        self.rocket_abovethreshold = False
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -308,10 +313,17 @@ class GameScene:
     def move_stars(self):
         for star in self.stars:
             star.move()
+            if self.rocket_y < self.screen.get_height() - 350:
+                star.rocket = True
+                self.rocket_abovethreshold = True
+                star.speed = self.rocket_velocity
             if star.y < -10:  # If star moves out of screen, reset its position
                 star.y = self.screen.get_height() + 10
                 star.x = random.randint(0, self.screen.get_width())
-
+            
+            if star.y > self.screen.get_height() + 10:  # If star moves out of screen, reset its position
+                star.y = -10
+                star.x = random.randint(0, self.screen.get_width())
     def draw_stars(self):
         for star in self.stars:
             pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 2)
@@ -360,7 +372,8 @@ class GameScene:
                 self.rocket_velocity += self.acceleration
 
                 # Move the rocket based on its velocity
-                self.rocket_y -= self.rocket_velocity
+                if not self.rocket_abovethreshold:
+                    self.rocket_y -= self.rocket_velocity
               
                 # Stop moving the rocket upwards if it reaches the top
                 if self.rocket_y <= 0:
@@ -370,9 +383,11 @@ class GameScene:
             if not self.rocket_moving_up:
                 # Apply gravity to the rocket
                 self.rocket_velocity -= self.gravitic_accelaration  # Decrease velocity due to gravity
-
+                if self.rocket_velocity < -20:
+                    pygame.quit()
                 # Move the rocket based on its velocity
-                self.rocket_y -= self.rocket_velocity
+                if not self.rocket_abovethreshold:
+                    self.rocket_y -= self.rocket_velocity
 
                 # Ensure that the rocket stays within the screen boundaries
             if self.rocket_y >= self.screen.get_height() - self.rocket_height - 50:
