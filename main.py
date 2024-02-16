@@ -289,13 +289,11 @@ class GameScene:
         self.star_speed_min = 1
         self.star_speed_max = 5
         self.stars = self.create_stars(self.num_stars, self.star_speed_min, self.star_speed_max)
-        self.emit_timer = 0
-        self.emit_interval = 20  # Emit particles every 20 milliseconds
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
-        self.rocket_speed = 5  # Define the speed at which the rocket moves upwards
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = 0  # Initial velocity
-        self.acceleration = 0.1  # Acceleration rate
+        self.acceleration = 0.03  # Acceleration rate
+        self.gravitic_accelaration = 0.1  # Acceleration rate
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -347,8 +345,7 @@ class GameScene:
                     self.rocket_moving_up = False  # Stop moving the rocket
 
     def update(self):
-        # Check if a thousand particles hit the ground
-        if self.particles_hit_ground >= 100000:
+
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
                 # Increase rocket velocity gradually
@@ -364,20 +361,20 @@ class GameScene:
             # Apply gravity when the rocket is not moving upwards
             if not self.rocket_moving_up:
                 # Apply gravity to the rocket
-                self.rocket_velocity -= self.acceleration  # Decrease velocity due to gravity
+                self.rocket_velocity -= self.gravitic_accelaration  # Decrease velocity due to gravity
 
                 # Move the rocket based on its velocity
                 self.rocket_y -= self.rocket_velocity
 
                 # Ensure that the rocket stays within the screen boundaries
-                if self.rocket_y >= self.screen.get_height() - self.rocket_height - 50:
+            if self.rocket_y >= self.screen.get_height() - self.rocket_height - 50:
                     self.rocket_y = self.screen.get_height() - self.rocket_height - 50
                     self.rocket_velocity = 0  # Stop the rocket when it reaches the ground
 
             
     def emit_particles(self):
         now = pygame.time.get_ticks()
-        if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
+        if self.particle_emit and self.rocket_on:
             for _ in range(20):  # Emit 20 particles at once
                 particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
                                     self.rocket_y + self.rocket_height, self.rocket_x, self.rocket_y)
