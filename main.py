@@ -303,6 +303,13 @@ class GameScene:
         self.power_on = pygame.mixer.Sound("power.mp3")
         self.power_on2 = pygame.mixer.Sound("switch.mp3")
         self.rocket_abovethreshold = False
+        # GUI
+        self.gui_image = pygame.image.load("gui.png")  # Load GUI image
+        self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
+        self.gui_rect = self.gui_image.get_rect()  # Position GUI image
+
+    def draw_gui(self):
+        self.screen.blit(self.gui_image, self.gui_rect)
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -450,7 +457,8 @@ class GameScene:
             # Update and draw particles
             self.particles.update(self.screen)
             self.particles.draw(self.screen)
-
+            # Draw GUI
+            self.draw_gui()
             # Update the display
             pygame.display.flip()
             self.clock.tick(30)
