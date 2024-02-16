@@ -344,17 +344,32 @@ class GameScene:
     def update(self):
         # Check if a thousand particles hit the ground
         if self.particles_hit_ground >= 100000:
-            
-            # Move the rocket upwards continuously while "W" is held down
-            if self.rocket_moving_up:
+            # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
+            if self.rocket_moving_up and self.rocket_on:
                 # Increase rocket velocity gradually
                 self.rocket_velocity += self.acceleration
 
                 # Move the rocket based on its velocity
                 self.rocket_y -= self.rocket_velocity
-            # Stop moving the rocket upwards if it reaches the top
-            if self.rocket_y <= 0:
-                self.rocket_moving_up = False
+              
+                # Stop moving the rocket upwards if it reaches the top
+                if self.rocket_y <= 0:
+                    self.rocket_moving_up = False
+
+            # Apply gravity when the rocket is not moving upwards
+            if not self.rocket_moving_up:
+                # Apply gravity to the rocket
+                self.rocket_velocity -= self.acceleration  # Decrease velocity due to gravity
+
+                # Move the rocket based on its velocity
+                self.rocket_y -= self.rocket_velocity
+
+                # Ensure that the rocket stays within the screen boundaries
+                if self.rocket_y >= self.screen.get_height() - self.rocket_height - 50:
+                    self.rocket_y = self.screen.get_height() - self.rocket_height - 50
+                    self.rocket_velocity = 0  # Stop the rocket when it reaches the ground
+
+            
     def emit_particles(self):
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on and now - self.emit_timer >= self.emit_interval:
