@@ -207,7 +207,7 @@ class Particle(pygame.sprite.Sprite):
         self.ax = ax
         self.ay = ay
     def update(self, screen):
-        pygame.draw.circle(self.image, self.color, (2, 2), 2)
+        pygame.draw.circle(self.image, self.color, (2, 2), 20)
         if self.speed_y > 0:  # If moving upwards
             self.speed_y -= self.gravity  # Apply gravity
             self.speed_y = max(self.speed_y, 0)  # Stop upward motion at 0
@@ -334,11 +334,13 @@ class GameScene:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
-                    if self.rocket_on:
-                        self.emit_timer = pygame.time.get_ticks()  # Start emit timer
+
                 elif event.key == pygame.K_w and self.rocket_on:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
+                elif event.key == pygame.K_w and not self.rocket_on:
+                    self.rocket_moving_up = False
+                    
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     self.particle_emit = False
