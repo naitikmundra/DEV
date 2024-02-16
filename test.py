@@ -1,59 +1,57 @@
-import pygame
-import sys
-import random
+#!/usr/bin/python3.4
+# Setup Python ----------------------------------------------- #
+import pygame, sys, random
 
-# Define colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-YELLOW = (255, 255, 0)
+# Setup pygame/window ---------------------------------------- #
+mainClock = pygame.time.Clock()
+from pygame.locals import *
+pygame.init()
+pygame.display.set_caption('game base')
+screen = pygame.display.set_mode((500, 500),0,32)
 
-class Particle(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((5, 5), pygame.SRCALPHA)
-        pygame.gfxdraw.aacircle(self.image, 2, 2, 2, YELLOW)  # Draw anti-aliased circle
-        pygame.gfxdraw.filled_circle(self.image, 2, 2, 2, YELLOW)  # Fill circle
-        self.rect = self.image.get_rect(center=(x, y))
-        self.speed_x = random.uniform(-0.1, 0.1)
-        self.speed_y = random.uniform(1, 2)
-        self.gravity = 0.1
+def circle_surf(radius, color):
+    surf = pygame.Surface((radius * 2, radius * 2))
+    pygame.draw.circle(surf, color, (radius, radius), radius)
+    surf.set_colorkey((0, 0, 0))
+    return surf
 
-    def update(self, screen):
-        if self.speed_y > 0:
-            self.speed_y -= self.gravity
-            self.speed_y = max(self.speed_y, 0)
-        else:
-            self.speed_y += self.gravity
-            self.speed_y = min(self.speed_y, 10)
-        self.rect.x += self.speed_x
-        self.rect.y -= self.speed_y
-        if self.rect.y > screen.get_height():
-            self.kill()
+# [loc, velocity, timer]
+particles = []
 
-def main():
-    pygame.init()
+# Loop ------------------------------------------------------- #
+while True:
 
-    screen = pygame.display.set_mode((800, 600))
-    clock = pygame.time.Clock()
+    # Background --------------------------------------------- #
+    screen.fill((0,0,0))
 
-    particles = pygame.sprite.Group()
-    for _ in range(100):
-        particle = Particle(random.randint(0, screen.get_width()), random.randint(0, screen.get_height()))
-        particles.add(particle)
+    pygame.draw.rect(screen, (50, 20, 120), pygame.Rect(100, 100, 200, 80))
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+    mx, my = pygame.mouse.get_pos()
+    particles.append([[mx, my], [random.randint(0, 20) / 10 - 1, -5], random.randint(6, 11)])
+
+    for particle in particles:
+        particle[0][0] += particle[1][0]
+        particle[0][1] += particle[1][1]
+        particle[2] -= 0.1
+        particle[1][1] += 0.15
+        pygame.draw.circle(screen, (255, 255, 255), [int(particle[0][0]), int(particle[0][1])], int(particle[2]))
+
+        radius = particle[2] * 2
+        screen.blit(,special_flags=BLEND_RGB_ADD)
+
+        if particle[2] <= 0:
+            particles.remove(particle)
+
+    # Buttons ------------------------------------------------ #
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
                 pygame.quit()
                 sys.exit()
 
-        particles.update(screen)
-
-        screen.fill(BLACK)
-        particles.draw(screen)
-
-        pygame.display.flip()
-        clock.tick(30)
-
-if __name__ == "__main__":
-    main()
+    # Update ------------------------------------------------- #
+    pygame.display.update()
+    mainClock.tick(60)

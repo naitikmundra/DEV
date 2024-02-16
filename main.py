@@ -2,6 +2,8 @@ import pygame
 import sys
 import pyautogui
 import random
+from pygame.locals import *
+
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -313,7 +315,7 @@ class GameScene:
     def move_stars(self):
         for star in self.stars:
             star.move()
-            if self.rocket_moving_up:
+            if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
                 star.speed = self.rocket_velocity
             else:
@@ -334,8 +336,13 @@ class GameScene:
                 star.x = random.randint(0, self.screen.get_width())
     def draw_stars(self):
         for star in self.stars:
-            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 2)
-
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 4)
+            self.screen.blit(self.circle_surf(8, (20,20,60)),(star.x -5,star.y-5), special_flags=BLEND_RGB_ADD)#adding glow to stars
+    def circle_surf(self,radius, color):
+        surf = pygame.Surface((radius * 2 , radius * 2))
+        pygame.draw.circle(surf, color, (radius, radius), radius)
+        surf.set_colorkey((0, 0, 0))
+        return surf
     def draw_ground(self):
         pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - 50, self.screen.get_width(), 50))
 
@@ -380,7 +387,7 @@ class GameScene:
                 self.rocket_velocity += self.acceleration
 
                 # Move the rocket based on its velocity
-                if not self.rocket_abovethreshold:
+                if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_y -= self.rocket_velocity
               
                 # Stop moving the rocket upwards if it reaches the top
