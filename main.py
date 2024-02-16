@@ -193,8 +193,9 @@ class MenuScene:
 class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y,ax,ay):
         super().__init__()
-        self.image = pygame.Surface((5, 5))
-        self.image.fill(YELLOW)
+        
+        self.image = pygame.Surface((5, 5), pygame.SRCALPHA)  # Set SRCALPHA flag for per-pixel alpha
+        self.color = (255, 255, 0, 255)  # Yellow color with some transparency
         self.rect = self.image.get_rect(center=(x, y))
         self.speed_x = random.uniform(-0.1, 0.1)  # Random horizontal speed
         self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
@@ -206,6 +207,7 @@ class Particle(pygame.sprite.Sprite):
         self.ax = ax
         self.ay = ay
     def update(self, screen):
+        pygame.draw.circle(self.image, self.color, (2, 2), 2)
         if self.speed_y > 0:  # If moving upwards
             self.speed_y -= self.gravity  # Apply gravity
             self.speed_y = max(self.speed_y, 0)  # Stop upward motion at 0
@@ -216,7 +218,8 @@ class Particle(pygame.sprite.Sprite):
             self.speed_y = min(self.speed_y, self.max_speed_y)  # Limit maximum vertical speed
             self.speed_x *= 0.99  # Apply air resistance to horizontal speed
         #despawn particles once it reaches far from rocket
-        if self.rect.y > self.ay + 400:
+        
+        if self.rect.y > self.ay + 200:
             self.kill()
         if self.rect.x > self.ax + 200 or self.rect.x < self.ax - 150:
             self.kill()
