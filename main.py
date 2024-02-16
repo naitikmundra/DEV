@@ -331,8 +331,11 @@ class GameScene:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
+                    if self.rocket_on:
+                        if self.rocket_velocity != 0:
+                             self.rocket_moving_up = False
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
-
+                    
                 elif event.key == pygame.K_w and self.rocket_on:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
