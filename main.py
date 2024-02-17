@@ -305,6 +305,13 @@ class GameScene:
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
         self.font = pygame.font.SysFont("Arial" , 18 , bold = True)
+        # Horizontal movement variables
+        self.rocket_horizontal_velocity = 0
+        self.rocket_horizontal_acceleration = 0.1
+        self.max_horizontal_speed = 5
+        self.rocket_rotation_angle = 0  # Initial tilt angle
+        self.rocket_rotation_speed = 2  # Rotation speed in degrees per frame
+        self.max_rotation_angle = 40  # Maximum rotation angle in degrees
 
     def fps_counter(self):
         fps = str(int(self.clock.get_fps()))
@@ -350,6 +357,18 @@ class GameScene:
             if star.y > self.screen.get_height() + 10:  # If star moves out of screen, reset its position
                 star.y = -10
                 star.x = random.randint(0, self.screen.get_width())
+            if self.rocket_horizontal_velocity < 0:
+                star.x -= star.speed
+            elif self.rocket_horizontal_velocity > 0:
+                star.x += star.speed
+
+            if star.x < -10:
+                star.x = self.screen.get_width() + 10
+                star.y = random.randint(0, self.screen.get_height())
+            elif star.x > self.screen.get_width() + 10:
+                star.x = -10
+                star.y = random.randint(0, self.screen.get_height())
+
     def draw_stars(self):
         for star in self.stars:
             pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 4)
@@ -363,8 +382,20 @@ class GameScene:
         pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - 50, self.screen.get_width(), 50))
 
     def draw_rocket(self):
-        pygame.draw.rect(self.screen, self.rocket_color, (self.rocket_x, self.rocket_y, self.rocket_width, self.rocket_height))
+        # Create a rotated surface for the rocket
+        rotated_rocket = pygame.Surface((self.rocket_width, self.rocket_height), pygame.SRCALPHA)
+        pygame.draw.rect(rotated_rocket, self.rocket_color, (0, 0, self.rocket_width, self.rocket_height))  # Draw the rocket on the surface
 
+        # Rotate the rocket surface
+        self.rocket_rotation_angle += self.rocket_horizontal_velocity * self.rocket_rotation_speed
+        self.rocket_rotation_angle = max(-self.max_rotation_angle, min(self.max_rotation_angle, self.rocket_rotation_angle))  # Limit rotation angle
+        rotated_rocket = pygame.transform.rotate(rotated_rocket, self.rocket_rotation_angle)
+
+        # Get the rect of the rotated surface
+        rotated_rect = rotated_rocket.get_rect(center=(self.rocket_x + self.rocket_width / 2, self.rocket_y + self.rocket_height / 2))
+
+        # Draw the rotated rocket
+        self.screen.blit(rotated_rocket, rotated_rect)
     def draw_rocket_on_indicator(self):
         if self.rocket_on:
             pygame.draw.circle(self.screen, self.rocket_on_indicator_color, self.rocket_on_indicator_pos, self.rocket_on_indicator_radius)
@@ -389,12 +420,20 @@ class GameScene:
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                 elif event.key == pygame.K_w and not self.rocket_on:
                     self.rocket_moving_up = False
+                elif event.key == pygame.K_a and self.rocket_on:
+                    # Move rocket left
+                    self.rocket_horizontal_velocity = -self.max_horizontal_speed
+                elif event.key == pygame.K_d and self.rocket_on:
+                    # Move rocket right
+                    self.rocket_horizontal_velocity = self.max_horizontal_speed
                     
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     self.particle_emit = False
                     self.rocket_moving_up = False  # Stop moving the rocket
-
+                elif event.key == pygame.K_a or event.key == pygame.K_d:
+                    # Stop horizontal movement
+                    self.rocket_horizontal_velocity = 0
     def update(self):
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
