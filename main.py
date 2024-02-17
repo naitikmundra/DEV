@@ -300,6 +300,8 @@ class GameScene:
         self.rocket_abovethreshold = False
         # GUI
         self.gui_image = pygame.image.load("gui.png").convert_alpha()  # Load GUI image
+        self.gui_image2 = pygame.image.load("gui2.png").convert_alpha()  # Load GUI image
+
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
         self.font = pygame.font.SysFont("Arial" , 18 , bold = True)
@@ -309,7 +311,10 @@ class GameScene:
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
         self.screen.blit(fps_t,(0,0))
     def draw_gui(self):
-        self.screen.blit(self.gui_image, self.gui_rect)
+        if self.rocket_on:
+            self.screen.blit(self.gui_image, self.gui_rect)
+        else:
+            self.screen.blit(self.gui_image2, self.gui_rect)
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
