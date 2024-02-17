@@ -111,12 +111,12 @@ class LoadingScene:
 
 
 class Star:
-    def __init__(self, x, y, speed, rocket=False):
+    def __init__(self, x, y, speed,radius, rocket=False):
         self.x = x
         self.y = y
         self.speed = speed
         self.rocket = rocket
-
+        self.radius = radius
     def move(self):
      if not self.rocket:
         self.y -= self.speed
@@ -144,7 +144,10 @@ class MenuScene:
             x = random.randint(0, self.screen.get_width())
             y = random.randint(0, self.screen.get_height())
             speed = random.randint(min_speed, max_speed)
-            stars.append(Star(x, y, speed))
+            star_radius = 2
+            if random.random() < 0.1:
+                star_radius = 10
+            stars.append(Star(x, y, speed,star_radius))
         return stars
 
     def move_stars(self):
@@ -156,10 +159,8 @@ class MenuScene:
 
     def draw_stars(self):
         for star in self.stars:
-            star_radius = 2
-            if random.random() < 0.1:
-                star_radius = 10
-            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), star_radius)
+
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), star.radius)
 
 
     def arrange_buttons(self):
@@ -331,7 +332,10 @@ class GameScene:
             x = random.randint(0, self.screen.get_width())
             y = random.randint(0, self.screen.get_height())
             speed = random.randint(min_speed, max_speed)
-            stars.append(Star(x, y, speed))
+            star_radius = 2
+            if random.random() < 0.1:
+                star_radius = 10
+            stars.append(Star(x, y, speed,star_radius))
         return stars
     # Define a function to check collision between rocket and star
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
@@ -380,7 +384,7 @@ class GameScene:
 
     def draw_stars(self):
         for star in self.stars:
-            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 4)
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), star.radius)
             self.screen.blit(self.circle_surf(8, (20,20,60)),(star.x -5,star.y-5), special_flags=BLEND_RGB_ADD)#adding glow to stars
     def circle_surf(self,radius, color):
         surf = pygame.Surface((radius * 2 , radius * 2))
@@ -432,10 +436,11 @@ class GameScene:
                     self.rocket_moving_up = False
                 elif event.key == pygame.K_a and self.rocket_on:
                     # Move rocket left
-                    self.rocket_horizontal_velocity = -self.max_horizontal_speed
+                    self.rocket_horizontal_velocity = self.max_horizontal_speed
+
                 elif event.key == pygame.K_d and self.rocket_on:
                     # Move rocket right
-                    self.rocket_horizontal_velocity = self.max_horizontal_speed
+                    self.rocket_horizontal_velocity = -self.max_horizontal_speed
                     
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
