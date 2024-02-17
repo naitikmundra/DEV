@@ -304,10 +304,15 @@ class GameScene:
         self.power_on2 = pygame.mixer.Sound("switch.mp3")
         self.rocket_abovethreshold = False
         # GUI
-        self.gui_image = pygame.image.load("gui.png")  # Load GUI image
+        self.gui_image = pygame.image.load("gui.png").convert_alpha()  # Load GUI image
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
+        self.font = pygame.font.SysFont("Arial" , 18 , bold = True)
 
+    def fps_counter(self):
+        fps = str(int(self.clock.get_fps()))
+        fps_t = self.font.render(fps , 1, pygame.Color("RED"))
+        self.screen.blit(fps_t,(0,0))
     def draw_gui(self):
         self.screen.blit(self.gui_image, self.gui_rect)
     def create_stars(self, num_stars, min_speed, max_speed):
@@ -459,6 +464,7 @@ class GameScene:
             self.particles.draw(self.screen)
             # Draw GUI
             self.draw_gui()
+            self.fps_counter()
             # Update the display
             pygame.display.flip()
             self.clock.tick(30)
