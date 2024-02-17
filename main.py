@@ -297,7 +297,7 @@ class GameScene:
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
-        self.acceleration = 0.03  # Acceleration rate
+        self.acceleration = 0.09  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.power_on = pygame.mixer.Sound("power.mp3")
         self.power_on2 = pygame.mixer.Sound("switch.mp3")
@@ -321,10 +321,11 @@ class GameScene:
         self.speedometer_length = 100  # Length of the speedometer rectangle
         self.speedometer_x = 20  # X-coordinate of the speedometer rectangle
         self.speedometer_y = screen.get_height() - self.speedometer_length - 20  # Y-coordinate of the speedometer rectangle
-        self.max_velocity = 50  # Maximum velocity of the rocket
+        self.max_velocity = 11  # Maximum velocity of the rocket
         # Define variables for adjusting the position of the speedometer
         self.speedometer_x = screen.get_width()/1.105  # X-coordinate of the speedometer
         self.speedometer_y = screen.get_height()/1.25  # Y-coordinate of the speedometer
+        self.groundremover = 50 #SLOWLY erase ground
     def draw_speedometer(self):
         # Calculate the angle of rotation based on the rocket's velocity
         angle = self.rocket_velocity / self.max_velocity * 90  # Convert velocity to angle (assuming 0 to 90 degrees)
@@ -369,7 +370,7 @@ class GameScene:
             y = random.randint(0, self.screen.get_height())
             speed = random.randint(min_speed, max_speed)
             star_radius = 2
-            if random.random() < 0.5:
+            if random.random() < 0.3:
                 star_radius = 10
             stars.append(Star(x, y, speed,star_radius))
         return stars
@@ -398,8 +399,7 @@ class GameScene:
             if self.rocket_y < self.screen.get_height() - 350:
                 
                 self.rocket_abovethreshold = True
-                
-            
+                self.groundremover -= 1
             if star.y < -10:  # If star moves out of screen, reset its position
                 star.y = self.screen.get_height() + 10
                 star.x = random.randint(0, self.screen.get_width())
@@ -408,9 +408,11 @@ class GameScene:
                 star.y = -10
                 star.x = random.randint(0, self.screen.get_width())
             if self.rocket_horizontal_velocity < 0:
-                star.x -= star.speed
+                if self.rocket_velocity > 0: 
+                    star.x -= star.speed
             elif self.rocket_horizontal_velocity > 0:
-                star.x += star.speed
+                if self.rocket_velocity > 0:
+                    star.x += star.speed
 
             if star.x < -10:
                 star.x = self.screen.get_width() + 10
@@ -429,7 +431,7 @@ class GameScene:
         surf.set_colorkey((0, 0, 0))
         return surf
     def draw_ground(self):
-        pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - 50, self.screen.get_width(), 50))
+        pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - self.groundremover, self.screen.get_width(), 50))
 
     def draw_rocket(self):
         # Create a rotated surface for the rocket
@@ -565,7 +567,8 @@ class GameScene:
             self.draw_stars()
 
             # Draw ground and rocket
-            self.draw_ground()
+            if self.groundremover > 0:
+                self.draw_ground()
             self.draw_rocket()
 
             # Draw rocket on indicator
