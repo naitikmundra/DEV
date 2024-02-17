@@ -524,10 +524,31 @@ class GameScene:
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on:
             for _ in range(20):  # Emit 20 particles at once
-                particle = Particle(random.uniform(self.rocket_x, self.rocket_x + self.rocket_width),
-                                    self.rocket_y + self.rocket_height, self.rocket_x, self.rocket_y)
+                # Calculate the offset from the rocket's position based on its rotation angle
+                offset_distance = random.uniform(0, 20)  # Example offset distance
+                offset_angle = random.uniform(-10, 10)  # Example offset angle
+                
+                # Convert offset angle to radians
+                offset_angle_radians = math.radians(self.rocket_rotation_angle + offset_angle)
+
+                # Calculate the offset components using trigonometry
+                offset_x = offset_distance * math.sin(offset_angle_radians)
+                offset_y = offset_distance * math.cos(offset_angle_radians)
+                if self.rocket_rotation_angle > 0:
+                    offset_x += self.rocket_rotation_angle - 10
+                    offset_y -= self.rocket_rotation_angle - 30
+                if self.rocket_rotation_angle < 0:
+                    offset_x -= -self.rocket_rotation_angle - 10
+                    offset_y += self.rocket_rotation_angle + 30
+
+                # Adjust the x-coordinate to emit particles from the entire base of the rocket
+                particle_x = random.uniform(self.rocket_x, self.rocket_x + self.rocket_width)
+
+                # Spawn the particle at the calculated position relative to the rocket's base
+                particle = Particle(particle_x + offset_x, self.rocket_y + self.rocket_height + offset_y, self.rocket_x, self.rocket_y)
                 self.particles.add(particle)
             self.emit_timer = now  # Reset emit timer
+
         
 
                 
