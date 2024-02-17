@@ -241,18 +241,13 @@ class Particle(pygame.sprite.Sprite):
         
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
-        self.check_hit_ground(screen)
         # Check if particle hits the sides of the screen and reverse its direction
         if self.rect.left <= 0 or self.rect.right >= screen.get_width():
             self.speed_x *= -1
 
         if self.rect.bottom >= screen.get_height() - 50:
             self.kill()
-    def check_hit_ground(self, screen):
-        
-        if self.rect.bottom >= screen.get_height() - 100:
-            # Notify the GameScene class when a particle hits the ground
-            return True
+
 '''
             self.speed_y = -0.2
             if self.speed_x >0:
@@ -331,9 +326,13 @@ class GameScene:
                 star.rocket = True
                 star.speed = self.rocket_velocity
             else:
+                
                 if self.rocket_velocity < 0:
                     star.rocket = False
                     star.speed = -self.rocket_velocity
+                else:
+                    
+                        star.speed = self.rocket_velocity
             if self.rocket_y < self.screen.get_height() - 350:
                 
                 self.rocket_abovethreshold = True
@@ -431,11 +430,7 @@ class GameScene:
                 self.particles.add(particle)
             self.emit_timer = now  # Reset emit timer
         
-        for particle in self.particles:
-            
-            if particle.check_hit_ground(self.screen):
-                
-                self.particles_hit_ground += 1
+
                 
     def run(self):
         while True:
