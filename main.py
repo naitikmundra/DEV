@@ -316,7 +316,6 @@ class GameScene:
         self.rocket_rotation_angle = 0  # Initial tilt angle
         self.rocket_rotation_speed = 2  # Rotation speed in degrees per frame
         self.max_rotation_angle = 40  # Maximum rotation angle in degrees
-
     def fps_counter(self):
         fps = str(int(self.clock.get_fps()))
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
@@ -333,7 +332,7 @@ class GameScene:
             y = random.randint(0, self.screen.get_height())
             speed = random.randint(min_speed, max_speed)
             star_radius = 2
-            if random.random() < 0.1:
+            if random.random() < 0.5:
                 star_radius = 10
             stars.append(Star(x, y, speed,star_radius))
         return stars
@@ -346,7 +345,8 @@ class GameScene:
             star.move()
             # Check collision between rocket and star
             if self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 2):
-                pass #COLLOISION CHECK
+                if star.radius==10:
+                    pygame.quit()
             if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
                 star.speed = self.rocket_velocity
@@ -454,13 +454,14 @@ class GameScene:
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-                # Increase rocket velocity gradually
-                self.rocket_velocity += self.acceleration
+              
+                self.rocket_velocity += self.acceleration 
 
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_y -= self.rocket_velocity
-              
+                    
+                
                 # Stop moving the rocket upwards if it reaches the top
                 if self.rocket_y <= 0:
                     self.rocket_moving_up = False
