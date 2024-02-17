@@ -316,6 +316,43 @@ class GameScene:
         self.rocket_rotation_angle = 0  # Initial tilt angle
         self.rocket_rotation_speed = 2  # Rotation speed in degrees per frame
         self.max_rotation_angle = 40  # Maximum rotation angle in degrees
+        self.speedometer_color = YELLOW  # Color of the speedometer rectangle
+        self.speedometer_width = 10  # Width of the speedometer rectangle
+        self.speedometer_length = 100  # Length of the speedometer rectangle
+        self.speedometer_x = 20  # X-coordinate of the speedometer rectangle
+        self.speedometer_y = screen.get_height() - self.speedometer_length - 20  # Y-coordinate of the speedometer rectangle
+        self.max_velocity = 50  # Maximum velocity of the rocket
+        # Define variables for adjusting the position of the speedometer
+        self.speedometer_x = screen.get_width()/1.105  # X-coordinate of the speedometer
+        self.speedometer_y = screen.get_height()/1.25  # Y-coordinate of the speedometer
+    def draw_speedometer(self):
+        # Calculate the angle of rotation based on the rocket's velocity
+        angle = self.rocket_velocity / self.max_velocity * 90  # Convert velocity to angle (assuming 0 to 90 degrees)
+
+        # Define the dimensions of the speedometer
+        speedometer_width = 20
+        speedometer_length = 100
+
+        # Calculate the position of the fixed bottom part of the speedometer (circle)
+        bottom_part_center = (self.speedometer_x + speedometer_width / 2, self.speedometer_y + speedometer_length)
+
+        # Draw the fixed bottom part of the speedometer (circle)
+        pygame.draw.circle(self.screen, self.speedometer_color, bottom_part_center, speedometer_width // 2)
+
+        # Calculate the position of the moving part of the speedometer (rectangle/needle)
+        needle_length = 50  # Length of the needle
+        needle_width = 5  # Width of the needle
+        needle_center = bottom_part_center  # Position the needle center at the bottom part center
+
+        # Calculate the end point of the needle based on the angle of rotation
+        needle_end_x = needle_center[0] + needle_length * math.cos(math.radians(angle))
+        needle_end_y = needle_center[1] - needle_length * math.sin(math.radians(angle))
+
+        # Draw the needle
+        pygame.draw.line(self.screen, self.speedometer_color, needle_center, (needle_end_x, needle_end_y), needle_width)
+
+
+
     def fps_counter(self):
         fps = str(int(self.clock.get_fps()))
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
@@ -451,6 +488,7 @@ class GameScene:
                     self.rocket_horizontal_velocity = 0
                     self.rocket_rotation_angle = 0
     def update(self):
+            self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
@@ -519,6 +557,7 @@ class GameScene:
             self.particles.draw(self.screen)
             # Draw GUI
             self.draw_gui()
+            self.draw_speedometer()
             self.fps_counter()
             # Update the display
             pygame.display.flip()
