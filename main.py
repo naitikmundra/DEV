@@ -3,7 +3,7 @@ import sys
 import pyautogui
 import random
 from pygame.locals import *
-
+import math
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -156,7 +156,10 @@ class MenuScene:
 
     def draw_stars(self):
         for star in self.stars:
-            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), 2)
+            star_radius = 2
+            if random.random() < 0.1:
+                star_radius = 10
+            pygame.draw.circle(self.screen, WHITE, (star.x, star.y), star_radius)
 
 
     def arrange_buttons(self):
@@ -330,10 +333,16 @@ class GameScene:
             speed = random.randint(min_speed, max_speed)
             stars.append(Star(x, y, speed))
         return stars
-
+    # Define a function to check collision between rocket and star
+    def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
+        distance = math.sqrt((star_x - rocket_x)**2 + (star_y - rocket_y)**2)
+        return distance < rocket_radius + star_radius
     def move_stars(self):
         for star in self.stars:
             star.move()
+            # Check collision between rocket and star
+            if self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 2):
+                pass #COLLOISION CHECK
             if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
                 star.speed = self.rocket_velocity
@@ -400,6 +409,7 @@ class GameScene:
         if self.rocket_on:
             pygame.draw.circle(self.screen, self.rocket_on_indicator_color, self.rocket_on_indicator_pos, self.rocket_on_indicator_radius)
 
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -434,6 +444,7 @@ class GameScene:
                 elif event.key == pygame.K_a or event.key == pygame.K_d:
                     # Stop horizontal movement
                     self.rocket_horizontal_velocity = 0
+                    self.rocket_rotation_angle = 0
     def update(self):
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
@@ -497,7 +508,6 @@ class GameScene:
 
             # Emit particles if necessary
             self.emit_particles()
-
             # Update and draw particles
             self.particles.update(self.screen)
             self.particles.draw(self.screen)
@@ -508,7 +518,7 @@ class GameScene:
             pygame.display.flip()
             self.clock.tick(30)
 
-            
+
 def main():
     # Take a screenshot and save it to a file
     screenshot = pyautogui.screenshot()
