@@ -297,7 +297,7 @@ class GameScene:
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
-        self.acceleration = 0.09  # Acceleration rate
+        self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.power_on = pygame.mixer.Sound("power.mp3")
         self.power_on2 = pygame.mixer.Sound("switch.mp3")
