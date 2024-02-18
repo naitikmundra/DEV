@@ -11,7 +11,9 @@ GRAY = (150, 150, 150)
 LIGHT_GRAY = (200, 200, 200)
 YELLOW = (255, 255, 0)
 RED_TRANSPARENT = (255, 0, 0, 128)  # Semi-transparent red color
-
+#GLOBAL
+sounds_folder = "library/sounds/"
+images_folder = "library/visual/"
 class Button:
     def __init__(self, text, font, x, y, width, height, default_color, hover_color):
         self.text = text
@@ -300,12 +302,12 @@ class GameScene:
         self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
-        self.power_on = pygame.mixer.Sound("power.mp3")
-        self.power_on2 = pygame.mixer.Sound("switch.mp3")
+        self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
+        self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
         self.rocket_abovethreshold = False
         # GUI
-        self.gui_image = pygame.image.load("gui.png").convert_alpha()  # Load GUI image
-        self.gui_image2 = pygame.image.load("gui2.png").convert_alpha()  # Load GUI image
+        self.gui_image = pygame.image.load(images_folder+"gui.png").convert_alpha()  # Load GUI image
+        self.gui_image2 = pygame.image.load(images_folder+"gui2.png").convert_alpha()  # Load GUI image
 
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
@@ -331,9 +333,9 @@ class GameScene:
         self.alert_duration = 500  # Duration of each state in milliseconds
         self.alert_timer = 0  # Timer to track the duration of each state
         self.alert_state = False  # Flag to track the current state of the alert effect
-        self.rocket_exhaust_sound = pygame.mixer.Sound("rocket_exhaust.wav")  # Load the rocket exhaust sound file
+        self.rocket_exhaust_sound = pygame.mixer.Sound(sounds_folder +"rocket_exhaust.wav")  # Load the rocket exhaust sound file
         self.rocket_sound_playing = False  # Flag to track whether the rocket exhaust sound is playing
-        self.alert_sound = pygame.mixer.Sound("alert.wav")  # Load the alert sound file
+        self.alert_sound = pygame.mixer.Sound(sounds_folder +"alert.wav")  # Load the alert sound file
         self.alert_sound.set_volume(0.9)  # Adjust the volume of the alert sound
 
         # Adjust the volume of the rocket exhaust sound
@@ -407,8 +409,16 @@ class GameScene:
         return stars
     # Define a function to check collision between rocket and star
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
-        distance = math.sqrt((star_x - rocket_x)**2 + (star_y - rocket_y)**2)
-        return distance < rocket_radius + star_radius
+        # Calculate the closest point on the rectangle to the center of the circle
+        closest_x = max(rocket_x, min(star_x, rocket_x + self.rocket_width))
+        closest_y = max(rocket_y, min(star_y, rocket_y + self.rocket_height))
+        distance = math.sqrt((closest_x - star_x) ** 2 + (closest_y - star_y) ** 2)
+        # Check if the distance is less than or equal to the circle's radius
+        if distance <= star_radius and self.rocket_abovethreshold:
+            return True
+        # Check if any of the rectangle's edges intersect with the circle
+        
+        return False
     def move_stars(self):
         for star in self.stars:
             star.move()
@@ -504,7 +514,7 @@ class GameScene:
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                     # Play the rocket exhaust sound if it's not already playing
                     if not self.rocket_sound_playing:
-                        self.rocket_exhaust_sound.play()
+                        self.rocket_exhaust_sound.play(-1)
                         self.rocket_sound_playing = True 
                 elif event.key == pygame.K_w and not self.rocket_on:
                     self.rocket_moving_up = False
