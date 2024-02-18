@@ -488,17 +488,21 @@ class GameScene:
         pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - self.groundremover, self.screen.get_width(), 50))
 
     def draw_rocket(self):
-        # Create a rotated surface for the rocket
-        rotated_rocket = pygame.Surface((self.rocket_width, self.rocket_height), pygame.SRCALPHA)
-        pygame.draw.rect(rotated_rocket, self.rocket_color, (0, 0, self.rocket_width, self.rocket_height))  # Draw the rocket on the surface
+        # Load the rocket image
+        rocket_image = pygame.image.load(images_folder+"rocket.png")
 
-        # Rotate the rocket surface
-        self.rocket_rotation_angle += self.rocket_horizontal_velocity * self.rocket_rotation_speed
-        self.rocket_rotation_angle = max(-self.max_rotation_angle, min(self.max_rotation_angle, self.rocket_rotation_angle))  # Limit rotation angle
-        rotated_rocket = pygame.transform.rotate(rotated_rocket, self.rocket_rotation_angle)
+        # Scale the rocket image to match the width and height
+        rocket_image = pygame.transform.scale(rocket_image, (self.rocket_width, self.rocket_height))
+
+        # Rotate the rocket image
+        rotated_rocket = pygame.transform.rotate(rocket_image, self.rocket_rotation_angle)
 
         # Get the rect of the rotated surface
         rotated_rect = rotated_rocket.get_rect(center=(self.rocket_x + self.rocket_width / 2, self.rocket_y + self.rocket_height / 2))
+
+        # Update the rotation angle
+        self.rocket_rotation_angle += self.rocket_horizontal_velocity * self.rocket_rotation_speed
+        self.rocket_rotation_angle = max(-self.max_rotation_angle, min(self.max_rotation_angle, self.rocket_rotation_angle))  # Limit rotation angle
 
         # Draw the rotated rocket
         self.screen.blit(rotated_rocket, rotated_rect)
