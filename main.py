@@ -339,7 +339,8 @@ class GameScene:
         self.alert_sound.set_volume(0.9)  # Adjust the volume of the alert sound
 
         # Adjust the volume of the rocket exhaust sound
-        self.rocket_exhaust_sound.set_volume(0.5) 
+        self.rocket_exhaust_sound.set_volume(0.5)
+        self.distance_travelled= 0
     def draw_speedometer(self):
         # Calculate the angle of rotation based on the rocket's velocity
         angle = self.rocket_velocity / self.max_velocity * 90  # Convert velocity to angle (assuming 0 to 90 degrees)
@@ -391,6 +392,8 @@ class GameScene:
         fps = str(int(self.clock.get_fps()))
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
         self.screen.blit(fps_t,(0,0))
+        score = self.font.render(str(int(self.distance_travelled)) , 1, pygame.Color("YELLOW"))
+        self.screen.blit(score,(0,20))
     def draw_gui(self):
         if self.rocket_on:
             self.screen.blit(self.gui_image, self.gui_rect)
@@ -429,14 +432,24 @@ class GameScene:
             if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
                 star.speed = self.rocket_velocity
+                    
+                    
+            
             else:
                 
                 if self.rocket_velocity < 0:
                     star.rocket = False
                     star.speed = -self.rocket_velocity
+                    
                 else:
                     
                         star.speed = self.rocket_velocity
+            if self.rocket_velocity < 0:
+                
+                self.distance_travelled +=self.rocket_velocity
+            else:
+                self.distance_travelled +=self.rocket_velocity
+   
             if self.rocket_y < self.screen.get_height() - 350:
                 
                 self.rocket_abovethreshold = True
