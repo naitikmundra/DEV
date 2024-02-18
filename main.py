@@ -10,6 +10,7 @@ WHITE = (255, 255, 255)
 GRAY = (150, 150, 150)
 LIGHT_GRAY = (200, 200, 200)
 YELLOW = (255, 255, 0)
+RED_TRANSPARENT = (255, 0, 0, 128)  # Semi-transparent red color
 
 class Button:
     def __init__(self, text, font, x, y, width, height, default_color, hover_color):
@@ -321,11 +322,22 @@ class GameScene:
         self.speedometer_length = 100  # Length of the speedometer rectangle
         self.speedometer_x = 20  # X-coordinate of the speedometer rectangle
         self.speedometer_y = screen.get_height() - self.speedometer_length - 20  # Y-coordinate of the speedometer rectangle
-        self.max_velocity = 11  # Maximum velocity of the rocket
+        self.max_velocity = 20  # Maximum velocity of the rocket
         # Define variables for adjusting the position of the speedometer
         self.speedometer_x = screen.get_width()/1.105  # X-coordinate of the speedometer
         self.speedometer_y = screen.get_height()/1.25  # Y-coordinate of the speedometer
         self.groundremover = 50 #SLOWLY erase ground
+        # Inside the GameScene's __init__ method, add the following attributes
+        self.alert_duration = 500  # Duration of each state in milliseconds
+        self.alert_timer = 0  # Timer to track the duration of each state
+        self.alert_state = False  # Flag to track the current state of the alert effect
+        self.rocket_exhaust_sound = pygame.mixer.Sound("rocket_exhaust.wav")  # Load the rocket exhaust sound file
+        self.rocket_sound_playing = False  # Flag to track whether the rocket exhaust sound is playing
+        self.alert_sound = pygame.mixer.Sound("alert.wav")  # Load the alert sound file
+        self.alert_sound.set_volume(0.9)  # Adjust the volume of the alert sound
+
+        # Adjust the volume of the rocket exhaust sound
+        self.rocket_exhaust_sound.set_volume(0.5) 
     def draw_speedometer(self):
         # Calculate the angle of rotation based on the rocket's velocity
         angle = self.rocket_velocity / self.max_velocity * 90  # Convert velocity to angle (assuming 0 to 90 degrees)
@@ -352,7 +364,26 @@ class GameScene:
         # Draw the needle
         pygame.draw.line(self.screen, self.speedometer_color, needle_center, (needle_end_x, needle_end_y), needle_width)
 
+    def alert(self):
 
+        # Inside the GameScene's run method, after updating the rocket position
+        self.alert_timer += self.clock.get_time()  # Increment the alert timer
+
+        # Check if it's time to change the alert state
+        if self.alert_timer >= self.alert_duration:
+            self.alert_state = not self.alert_state  # Toggle the alert state
+            self.alert_timer = 0  # Reset the timer
+        if not self.rocket_moving_up and self.alert_state:
+         if self.rocket_abovethreshold and self.rocket_velocity < 0:
+            self.alert_sound.play()  
+            # Create a semi-transparent red surface
+            overlay_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
+            overlay_surface.fill((255, 0, 0, 50))  # Fill with semi-transparent red color (R, G, B, Alpha)
+
+            # Blit the overlay surface onto the screen
+            self.screen.blit(overlay_surface, (0, 0))
+        else:
+            self.alert_sound.stop() 
 
     def fps_counter(self):
         fps = str(int(self.clock.get_fps()))
@@ -471,6 +502,10 @@ class GameScene:
                 elif event.key == pygame.K_w and self.rocket_on:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
+                    # Play the rocket exhaust sound if it's not already playing
+                    if not self.rocket_sound_playing:
+                        self.rocket_exhaust_sound.play()
+                        self.rocket_sound_playing = True 
                 elif event.key == pygame.K_w and not self.rocket_on:
                     self.rocket_moving_up = False
                 elif event.key == pygame.K_a and self.rocket_on:
@@ -485,6 +520,9 @@ class GameScene:
                 if event.key == pygame.K_w:
                     self.particle_emit = False
                     self.rocket_moving_up = False  # Stop moving the rocket
+                    # Stop playing the rocket exhaust sound
+                    self.rocket_exhaust_sound.stop()
+                    self.rocket_sound_playing = False  # Reset the flag
                 elif event.key == pygame.K_a or event.key == pygame.K_d:
                     # Stop horizontal movement
                     self.rocket_horizontal_velocity = 0
@@ -583,6 +621,7 @@ class GameScene:
             self.draw_gui()
             self.draw_speedometer()
             self.fps_counter()
+            self.alert()
             # Update the display
             pygame.display.flip()
             self.clock.tick(30)
