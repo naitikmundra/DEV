@@ -4,6 +4,7 @@ import pyautogui
 import random
 from pygame.locals import *
 import math
+
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -207,7 +208,7 @@ class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y,ax,ay):
         super().__init__()
         
-        self.image = pygame.Surface((5, 5), pygame.SRCALPHA)  # Set SRCALPHA flag for per-pixel alpha
+        self.image = pygame.Surface((5, 5), pygame.SRCALPHA | pygame.HWSURFACE)  # Set SRCALPHA flag for per-pixel alpha
         self.color = (255, 255, 0, 255)  # Yellow color with some transparency
         self.rect = self.image.get_rect(center=(x, y))
         self.speed_x = random.uniform(-0.1, 0.1)  # Random horizontal speed
@@ -337,6 +338,8 @@ class GameScene:
         self.rocket_sound_playing = False  # Flag to track whether the rocket exhaust sound is playing
         self.alert_sound = pygame.mixer.Sound(sounds_folder +"alert.wav")  # Load the alert sound file
         self.alert_sound.set_volume(0.9)  # Adjust the volume of the alert sound
+        self.rocket_image = pygame.image.load(images_folder+"rocket.png").convert_alpha()
+        self.rocket_image = pygame.transform.scale(self.rocket_image, (self.rocket_width, self.rocket_height))
 
         # Adjust the volume of the rocket exhaust sound
         self.rocket_exhaust_sound.set_volume(0.5)
@@ -489,13 +492,11 @@ class GameScene:
 
     def draw_rocket(self):
         # Load the rocket image
-        rocket_image = pygame.image.load(images_folder+"rocket.png")
 
         # Scale the rocket image to match the width and height
-        rocket_image = pygame.transform.scale(rocket_image, (self.rocket_width, self.rocket_height))
 
         # Rotate the rocket image
-        rotated_rocket = pygame.transform.rotate(rocket_image, self.rocket_rotation_angle)
+        rotated_rocket = pygame.transform.rotate(self.rocket_image, self.rocket_rotation_angle)
 
         # Get the rect of the rotated surface
         rotated_rect = rotated_rocket.get_rect(center=(self.rocket_x + self.rocket_width / 2, self.rocket_y + self.rocket_height / 2))
@@ -668,7 +669,7 @@ def main():
     screen_height = info.current_h
 
     # Create a fullscreen display
-    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 
     # Loading scene
     #loading_scene = LoadingScene(screen, "screenshot.png")
