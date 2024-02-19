@@ -360,6 +360,9 @@ class GameScene:
         # Stiffness factor
         self.stiffness = 0.02
         self.scroll_sound = pygame.mixer.Sound(sounds_folder+"valve.mp3")
+        #FUEL MANAGEMENT
+        self.fuelflow = 0
+       
 
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
@@ -596,11 +599,13 @@ class GameScene:
                             self.scroll_sound.play()
                             self.angle -= math.pi / 18 * self.stiffness * self.scroll_value  # Rotate clockwise with stiffness
                             self.scroll_value -= 1
+                            self.fuelflow -=1
                     elif event.button == 5:  # Scroll Down
                         if self.scroll_value < 100:
                             self.scroll_sound.play()
                             self.angle += math.pi / 18 * self.stiffness * self.scroll_value  # Rotate anti-clockwise with stiffness
                             self.scroll_value += 1
+                            self.fuelflow +=1
     def update(self):
             self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
 
@@ -637,7 +642,7 @@ class GameScene:
     def emit_particles(self):
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on:
-            for _ in range(20):  # Emit 20 particles at once
+            for _ in range(self.fuelflow):  # Emit 20 particles at once
                 # Calculate the offset from the rocket's position based on its rotation angle
                 offset_distance = random.uniform(0, 20)  # Example offset distance
                 offset_angle = random.uniform(-10, 10)  # Example offset angle
