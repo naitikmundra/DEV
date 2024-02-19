@@ -1,56 +1,71 @@
 import pygame
-import random
+import math
 
-# Define colors
+# Initialize Pygame
+pygame.init()
+
+# Set up display
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Rotating Plus Symbol")
+
+# Colors
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-class Star:
-    def __init__(self, x, y, radius, speed):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.speed = 300
+# Circle parameters
+circle_radius = 150
+circle_center = (WIDTH // 2, HEIGHT // 2)
 
-    def move(self, dt):
-        self.y += self.speed * dt
+# Plus symbol parameters
+plus_length = 300
+plus_width = 10
+plus_color = BLACK
 
-class Game:
-    def __init__(self):
-        pygame.init()
-        self.screen_width = 800
-        self.screen_height = 600
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        self.clock = pygame.time.Clock()
-        self.stars = [Star(random.randint(0, self.screen_width), random.randint(0, self.screen_height), random.randint(1, 3), random.uniform(0.1, 1.0)) for _ in range(100)]
+# Angle for rotation
+angle = 0
+scroll_value = 0
 
-    def run(self):
-        running = True
-        while running:
-            dt = self.clock.tick(60) / 1000.0  # Convert milliseconds to seconds
+# Stiffness factor
+stiffness = 0.005
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+# Main loop
+running = True
+while running:
+    screen.fill(WHITE)
 
-            self.move_stars(dt)
-            self.draw_stars()
+    # Event handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            distance = math.sqrt((mouse_pos[0] - circle_center[0])**2 + (mouse_pos[1] - circle_center[1])**2)
+            if distance <= circle_radius:
+                if event.button == 4:  # Scroll Up
+                    if scroll_value > 0:
+                        angle -= math.pi / 18 * stiffness * scroll_value  # Rotate clockwise with stiffness
+                        scroll_value -= 1
+                elif event.button == 5:  # Scroll Down
+                    if scroll_value < 100:
+                        angle += math.pi / 18 * stiffness * scroll_value  # Rotate anti-clockwise with stiffness
+                        scroll_value += 1
+                print("Scroll Value:", scroll_value)
+        
+    # Calculate the positions of the ends of the plus symbol
+    plus_end1 = (circle_center[0] + plus_length/2 * math.cos(angle), circle_center[1] + plus_length/2 * math.sin(angle))
+    plus_end2 = (circle_center[0] + plus_length/2 * math.cos(angle + math.pi), circle_center[1] + plus_length/2 * math.sin(angle + math.pi))
+    plus_end3 = (circle_center[0] + plus_length/2 * math.cos(angle + math.pi/2), circle_center[1] + plus_length/2 * math.sin(angle + math.pi/2))
+    plus_end4 = (circle_center[0] + plus_length/2 * math.cos(angle - math.pi/2), circle_center[1] + plus_length/2 * math.sin(angle - math.pi/2))
 
-            pygame.display.flip()
+    # Draw the plus symbol
+    pygame.draw.line(screen, plus_color, plus_end1, plus_end2, plus_width)
+    pygame.draw.line(screen, plus_color, plus_end3, plus_end4, plus_width)
 
-        pygame.quit()
+    # Draw circle
+    pygame.draw.circle(screen, BLACK, circle_center, circle_radius, 2)
 
-    def move_stars(self, dt):
-        for star in self.stars:
-            star.move(dt)
-            if star.y > self.screen_height:  # If star moves out of screen, reset its position
-                star.y = 0
-                star.x = random.randint(0, self.screen_width)
+    pygame.display.flip()
 
-    def draw_stars(self):
-        self.screen.fill((0, 0, 0))  # Clear the screen
-        for star in self.stars:
-            pygame.draw.circle(self.screen, WHITE, (int(star.x), int(star.y)), star.radius)
-
-if __name__ == "__main__":
-    game = Game()
-    game.run()
+# Quit Pygame
+pygame.quit()
