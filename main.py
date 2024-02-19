@@ -565,7 +565,7 @@ class GameScene:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                     # Play the rocket exhaust sound if it's not already playing
-                    if not self.rocket_sound_playing:
+                    if not self.rocket_sound_playing and self.fuelflow > 0:
                         self.rocket_exhaust_sound.play(-1)
                         self.rocket_sound_playing = True 
                 elif event.key == pygame.K_w and not self.rocket_on:
@@ -607,13 +607,17 @@ class GameScene:
                             self.scroll_value += 1
                             self.fuelflow +=1
     def update(self):
+            self.max_velocity = 50
             self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-              
-                self.rocket_velocity += self.acceleration 
-
+                  
+                self.rocket_velocity += self.fuelflow / 100
+                if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
+                    pygame.quit()
+                if self.fuelflow ==0:
+                    self.rocket_velocity -= self.gravitic_accelaration
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_y -= self.rocket_velocity
