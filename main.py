@@ -344,6 +344,37 @@ class GameScene:
         # Adjust the volume of the rocket exhaust sound
         self.rocket_exhaust_sound.set_volume(0.5)
         self.distance_travelled= 0
+        # Fuel wheel valve parameters
+        self.circle_radius = 150
+        self.circle_center = (screen.get_width() /1.2, screen.get_height()/1.25)
+
+        # Plus symbol parameters
+        self.plus_length = self.circle_radius * 2
+        self.plus_width = 10
+        self.plus_color = WHITE
+
+        # Angle for rotation
+        self.angle = 0
+        self.scroll_value = 0
+
+        # Stiffness factor
+        self.stiffness = 0.02
+        self.scroll_sound = pygame.mixer.Sound(sounds_folder+"valve.mp3")
+
+    def draw_fuelwheel(self):
+        # Calculate the positions of the ends of the plus symbol
+        plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
+        plus_end2 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle + math.pi), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle + math.pi))
+        plus_end3 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle + math.pi/2), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle + math.pi/2))
+        plus_end4 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle - math.pi/2), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle - math.pi/2))
+
+        # Draw the plus symbol
+        pygame.draw.line(self.screen, self.plus_color, plus_end1, plus_end2, self.plus_width)
+        pygame.draw.line(self.screen, self.plus_color, plus_end3, plus_end4, self.plus_width)
+
+        # Draw circle
+        pygame.draw.circle(self.screen, WHITE, self.circle_center, self.circle_radius, 2)
+
     def draw_speedometer(self):
         # Calculate the angle of rotation based on the rocket's velocity
         angle = self.rocket_velocity / self.max_velocity * 90  # Convert velocity to angle (assuming 0 to 90 degrees)
@@ -555,6 +586,21 @@ class GameScene:
                     # Stop horizontal movement
                     self.rocket_horizontal_velocity = 0
                     self.rocket_rotation_angle = 0
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+             if self.rocket_on:
+                mouse_pos = pygame.mouse.get_pos()
+                distance = math.sqrt((mouse_pos[0] - self.circle_center[0])**2 + (mouse_pos[1] - self.circle_center[1])**2)
+                if distance <= self.circle_radius:
+                    if event.button == 4:  # Scroll Up
+                        if self.scroll_value > 0:
+                            self.scroll_sound.play()
+                            self.angle -= math.pi / 18 * self.stiffness * self.scroll_value  # Rotate clockwise with stiffness
+                            self.scroll_value -= 1
+                    elif event.button == 5:  # Scroll Down
+                        if self.scroll_value < 100:
+                            self.scroll_sound.play()
+                            self.angle += math.pi / 18 * self.stiffness * self.scroll_value  # Rotate anti-clockwise with stiffness
+                            self.scroll_value += 1
     def update(self):
             self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
 
@@ -650,6 +696,7 @@ class GameScene:
             self.draw_speedometer()
             self.fps_counter()
             self.alert()
+            self.draw_fuelwheel()
             # Update the display
             pygame.display.flip()
             self.clock.tick(30)
