@@ -306,12 +306,8 @@ class GameScene:
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
         self.rocket_abovethreshold = False
-        # GUI
-        self.gui_image = pygame.image.load(images_folder+"gui.png").convert_alpha()  # Load GUI image
-        self.gui_image2 = pygame.image.load(images_folder+"gui2.png").convert_alpha()  # Load GUI image
 
-        self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
-        self.gui_rect = self.gui_image.get_rect()  # Position GUI image
+
         self.font = pygame.font.SysFont("Arial" , 18 , bold = True)
         # Horizontal movement variables
         self.rocket_horizontal_velocity = 0
@@ -327,7 +323,7 @@ class GameScene:
         self.speedometer_y = screen.get_height() - self.speedometer_length - 20  # Y-coordinate of the speedometer rectangle
         self.max_velocity = 20  # Maximum velocity of the rocket
         # Define variables for adjusting the position of the speedometer
-        self.speedometer_x = screen.get_width()/1.105  # X-coordinate of the speedometer
+        self.speedometer_x = screen.get_width()/1.2  # X-coordinate of the speedometer
         self.speedometer_y = screen.get_height()/1.25  # Y-coordinate of the speedometer
         self.groundremover = 50 #SLOWLY erase ground
         # Inside the GameScene's __init__ method, add the following attributes
@@ -345,8 +341,8 @@ class GameScene:
         self.rocket_exhaust_sound.set_volume(0.5)
         self.distance_travelled= 0
         # Fuel wheel valve parameters
-        self.circle_radius = 150
-        self.circle_center = (screen.get_width() /1.2, screen.get_height()/1.25)
+        self.circle_radius = 85
+        self.circle_center = (screen.get_width() /1.486, screen.get_height()/1.178)
 
         # Plus symbol parameters
         self.plus_length = self.circle_radius * 2
@@ -431,11 +427,7 @@ class GameScene:
         self.screen.blit(fps_t,(0,0))
         score = self.font.render(str(int(self.distance_travelled)) , 1, pygame.Color("YELLOW"))
         self.screen.blit(score,(0,20))
-    def draw_gui(self):
-        if self.rocket_on:
-            self.screen.blit(self.gui_image, self.gui_rect)
-        else:
-            self.screen.blit(self.gui_image2, self.gui_rect)
+   
     def create_stars(self, num_stars, min_speed, max_speed):
         stars = []
         for _ in range(num_stars):
@@ -714,7 +706,6 @@ class GameScene:
             self.particles.update(self.screen)
             self.particles.draw(self.screen)
             # Draw GUI
-            self.draw_gui()
             self.draw_speedometer()
             self.fps_counter()
             self.alert()
