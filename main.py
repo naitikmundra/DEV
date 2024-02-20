@@ -622,7 +622,7 @@ class GameScene:
                 if self.rocket_velocity >= 0:
                     self.rocket_velocity = self.fuelflow
                 else:
-                    self.rocket_velocity += self.fuelflow
+                    self.rocket_velocity += self.acceleration
                 
                 if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
                     pygame.quit()
