@@ -629,7 +629,8 @@ class GameScene:
                
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
-                    self.rocket_y -= self.rocket_velocity
+                    self.rocket_velocity -=10
+                    self.rocket_y -= self.rocket_velocity 
                     
                 
                 # Stop moving the rocket upwards if it reaches the top
@@ -646,8 +647,7 @@ class GameScene:
                 if not self.rocket_abovethreshold:
                     self.rocket_y -= self.rocket_velocity
                     self.rocket_velocity -= self.gravitic_accelaration 
-            if not self.rocket_abovethreshold:
-                self.rocket_velocity -= self.gravitic_accelaration 
+           
 
 
                 # Ensure that the rocket stays within the screen boundaries
