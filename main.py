@@ -561,11 +561,11 @@ class GameScene:
                         self.power_on.play()
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
                     
-                elif event.key == pygame.K_w and self.rocket_on:
+                elif event.key == pygame.K_w and self.rocket_on and self.fuelflow > 0:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                     # Play the rocket exhaust sound if it's not already playing
-                    if not self.rocket_sound_playing and self.fuelflow > 0:
+                    if not self.rocket_sound_playing:
                         self.rocket_exhaust_sound.play(-1)
                         self.rocket_sound_playing = True 
                 elif event.key == pygame.K_w and not self.rocket_on:
@@ -577,9 +577,10 @@ class GameScene:
                 elif event.key == pygame.K_d and self.rocket_on:
                     # Move rocket right
                     self.rocket_horizontal_velocity = -self.max_horizontal_speed
-                    
+
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
+                    
                     self.particle_emit = False
                     self.rocket_moving_up = False  # Stop moving the rocket
                     # Stop playing the rocket exhaust sound
@@ -607,17 +608,25 @@ class GameScene:
                             self.scroll_value += 1
                             self.fuelflow +=1
     def update(self):
+            if self.fuelflow ==0:
+                    self.particle_emit = False
+                    self.rocket_moving_up = False  # Stop moving the rocket
+                    # Stop playing the rocket exhaust sound
+                    self.rocket_exhaust_sound.stop()
+                    self.rocket_sound_playing = False  # Reset the flag
             self.max_velocity = 50
             self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-                  
-                self.rocket_velocity += self.fuelflow / 100
+                if self.rocket_velocity >= 0:
+                    self.rocket_velocity = self.fuelflow
+                else:
+                    self.rocket_velocity += self.fuelflow
+                
                 if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
                     pygame.quit()
-                if self.fuelflow ==0:
-                    self.rocket_velocity -= self.gravitic_accelaration
+               
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_y -= self.rocket_velocity
@@ -636,6 +645,10 @@ class GameScene:
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold:
                     self.rocket_y -= self.rocket_velocity
+                    self.rocket_velocity -= self.gravitic_accelaration 
+            if not self.rocket_abovethreshold:
+                self.rocket_velocity -= self.gravitic_accelaration 
+
 
                 # Ensure that the rocket stays within the screen boundaries
             if self.rocket_y >= self.screen.get_height() - self.rocket_height - 50:
