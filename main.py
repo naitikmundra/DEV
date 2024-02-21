@@ -207,56 +207,48 @@ class MenuScene:
             clock.tick(30)
 
 class Particle(pygame.sprite.Sprite):
-    def __init__(self, x, y,ax,ay):
+    def __init__(self, x, y, ax, ay):
         super().__init__()
         
-        self.image = pygame.Surface((5, 5), pygame.SRCALPHA | pygame.HWSURFACE)  # Set SRCALPHA flag for per-pixel alpha
-        self.color = (255, 255, 0, 255)  # Yellow color with some transparency
+        self.image = pygame.Surface((5, 5), pygame.SRCALPHA)  
+        pygame.draw.circle(self.image, (255, 255, 0, 255), (2, 2), 20)  # Draw particle once
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed_x = random.uniform(-0.1, 0.1)  # Random horizontal speed
-        self.speed_y = random.uniform(1, 2)  # Adjusted initial upward speed
-        self.gravity = 2  # Gravity to simulate downward acceleration
-        self.max_speed_y = 10  # Maximum vertical speed
-        self.sideways_drift = random.uniform(-0.09, 0.09)  # Initial sideways drift
-        self.max_x_speed = 0.01  # Maximum speed on the x-axis
-        self.sideways_drift_limit = 0.5  # Limit for sideways drift
+        
+        self.position = pygame.Vector2(x, y)
+        self.velocity = pygame.Vector2(random.uniform(-0.1, 0.1), random.uniform(1, 2))
+        self.gravity = pygame.Vector2(0, 0.2)
+        self.max_speed_y = 10
+        self.sideways_drift = random.uniform(-0.09, 0.09)
+        self.max_x_speed = 0.01
+        self.sideways_drift_limit = 0.5
         self.ax = ax
         self.ay = ay
-    def update(self, screen):
-        pygame.draw.circle(self.image, self.color, (2, 2), 20)
-        if self.speed_y > 0:  # If moving upwards
-            self.speed_y -= self.gravity  # Apply gravity
-            self.speed_y = max(self.speed_y, 0)  # Stop upward motion at 0
-            self.speed_x += self.sideways_drift  # Add sideways drift
 
-        else:  # If moving downwards
-            self.speed_y += self.gravity  # Apply gravity
-            self.speed_y = min(self.speed_y, self.max_speed_y)  # Limit maximum vertical speed
-            self.speed_x *= 0.99  # Apply air resistance to horizontal speed
-        #despawn particles once it reaches far from rocket
-        
-        if self.rect.y > self.ay + 300:
+    def update(self, screen):
+        self.position += self.velocity
+        self.velocity += self.gravity
+        self.sideways_drift = min(max(self.sideways_drift, -self.sideways_drift_limit), self.sideways_drift_limit)
+        self.velocity.x += self.sideways_drift
+
+        if self.position.y > self.ay + 300 or self.position.x > self.ax + 200 or self.position.x < self.ax - 150:
             self.kill()
-        if self.rect.x > self.ax + 200 or self.rect.x < self.ax - 150:
-            self.kill()
-        #setting limit on how much particles can travel on x-axis 
-        if self.rect.x > self.ax+ random.uniform(50,150):
-            self.sideways_drift =0
-            if self.speed_x >0:
-                self.speed_x -=0.05
-        if self.rect.x < self.ax- random.uniform(10,100):
-            self.sideways_drift =0
-            if self.speed_x <0:
-                self.speed_x +=0.05
+
+        if self.position.x > self.ax + random.uniform(50, 150):
+            self.sideways_drift = 0
+            if self.velocity.x > 0:
+                self.velocity.x -= 0.05
+        if self.position.x < self.ax - random.uniform(10, 100):
+            self.sideways_drift = 0
+            if self.velocity.x < 0:
+                self.velocity.x += 0.05
         
-        self.rect.x += self.speed_x
-        self.rect.y += self.speed_y
-        # Check if particle hits the sides of the screen and reverse its direction
         if self.rect.left <= 0 or self.rect.right >= screen.get_width():
-            self.speed_x *= -1
+            self.velocity.x *= -1
 
         if self.rect.bottom >= screen.get_height() - 50:
             self.kill()
+
+        self.rect.center = self.position
 
 '''
             self.speed_y = -0.2
@@ -303,9 +295,8 @@ class GameScene:
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
-        self.acceleration = 0.03  # Acceleration rate
-        self.gravitic_accelaration = 0.5  # Acceleration rate
-        self.gravitic_accelarationpost = 1  # Acceleration rate
+        self.gravitic_accelaration = 0.1  # Acceleration rate
+        self.gravitic_accelarationpost = 0.3  # Acceleration rate
         self.graviticdivision = 20 #Rocket going down and pressing W tweaks
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
