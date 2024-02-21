@@ -302,8 +302,8 @@ class GameScene:
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
-        self.gravitic_accelaration = 1  # Acceleration rate
-        self.gravitic_accelarationpost = 4  # Acceleration rate
+        self.gravitic_accelaration = 0.5  # Acceleration rate
+        self.gravitic_accelarationpost = 1  # Acceleration rate
         self.graviticdivision = 20 #Rocket going down and pressing W tweaks
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
@@ -594,13 +594,13 @@ class GameScene:
                             self.scroll_sound.play()
                             self.angle -= math.pi / 18 * self.stiffness * self.scroll_value  # Rotate clockwise with stiffness
                             self.scroll_value -= 1
-                            self.fuelflow -=0.3
+                            self.fuelflow -=0.1
                     elif event.button == 5:  # Scroll Down
                         if self.scroll_value < 100:
                             self.scroll_sound.play()
                             self.angle += math.pi / 18 * self.stiffness * self.scroll_value  # Rotate anti-clockwise with stiffness
                             self.scroll_value += 1
-                            self.fuelflow +=0.3
+                            self.fuelflow +=0.1
  
     def update(self):
             if self.scroll_value ==0:
