@@ -304,7 +304,7 @@ class GameScene:
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.gravitic_accelarationpost = 0.1  # Acceleration rate
-
+        self.graviticdivision = 10 #Rocket going down and pressing W tweaks
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
         self.rocket_abovethreshold = False
@@ -616,7 +616,7 @@ class GameScene:
                 if self.rocket_velocity >= 0:
                     self.rocket_velocity = self.fuelflow
                 else:
-                    self.rocket_velocity += self.acceleration
+                    self.rocket_velocity += self.fuelflow/self.graviticdivision
                 
                 if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
                     pygame.quit()
