@@ -1,3 +1,5 @@
+#NEXT MAKE SWAPPING BETWEEN SELF.FUEL flow and GRAVITY SMOOTH
+#2. SETUP GRAVITY ACCORDING TO FUEL FLOW
 import pygame
 import sys
 import pyautogui
@@ -615,8 +617,10 @@ class GameScene:
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
                 if self.rocket_velocity >= 0:
-                    
-                    self.rocket_velocity = self.fuelflow 
+                 if self.fuelflow - 2 <  self.rocket_velocity:  
+                    self.rocket_velocity = self.fuelflow
+                 else:
+                     self.rocket_velocity +=1
                 else:
                   
                     self.rocket_velocity += 1.1
