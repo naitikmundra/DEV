@@ -302,8 +302,8 @@ class GameScene:
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
-        self.gravitic_accelaration = 0.1  # Acceleration rate
-        self.gravitic_accelarationpost = 5  # Acceleration rate
+        self.gravitic_accelaration = 1  # Acceleration rate
+        self.gravitic_accelarationpost = 4  # Acceleration rate
         self.graviticdivision = 20 #Rocket going down and pressing W tweaks
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
@@ -601,6 +601,7 @@ class GameScene:
                             self.angle += math.pi / 18 * self.stiffness * self.scroll_value  # Rotate anti-clockwise with stiffness
                             self.scroll_value += 1
                             self.fuelflow +=0.3
+ 
     def update(self):
             if self.scroll_value ==0:
                     self.particle_emit = False
@@ -616,11 +617,12 @@ class GameScene:
                 if self.rocket_velocity >= 0:
                     self.rocket_velocity = self.fuelflow 
                 else:
-                    self.rocket_velocity += self.fuelflow  
+                  
+                    self.rocket_velocity += self.fuelflow 
                 
                 
                
-                # APPLY GRAVITY
+                # APPLY GRAVITY WHEN GOING UP
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_velocity -= self.gravitic_accelarationpost
                     self.rocket_y -= self.rocket_velocity
@@ -632,14 +634,15 @@ class GameScene:
 
             # Apply gravity when the rocket is not moving upwards
             if not self.rocket_moving_up:
-                # Apply gravity to the rocket
-                self.rocket_velocity -= self.gravitic_accelarationpost  # Decrease velocity due to gravity
+
                 
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold:
                     self.rocket_y -= self.rocket_velocity
-                    self.rocket_velocity -= self.gravitic_accelaration 
-           
+                    self.rocket_velocity -= self.gravitic_accelarationpost
+                else:
+                # Apply gravity to the rocket
+                    self.rocket_velocity -= self.gravitic_accelaration # Decrease velocity due to gravity           
 
 
                 # Ensure that the rocket stays within the screen boundaries
