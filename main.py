@@ -427,7 +427,7 @@ class GameScene:
         fps = str(int(self.clock.get_fps()))
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
         self.screen.blit(fps_t,(0,0))
-        score = self.font.render(str(int(self.distance_travelled)) , 1, pygame.Color("YELLOW"))
+        score = self.font.render(str((self.rocket_velocity)) , 1, pygame.Color("YELLOW"))
         self.screen.blit(score,(0,20))
    
     def create_stars(self, num_stars, min_speed, max_speed):
@@ -449,7 +449,7 @@ class GameScene:
         distance = math.sqrt((closest_x - star_x) ** 2 + (closest_y - star_y) ** 2)
         # Check if the distance is less than or equal to the circle's radius
         if distance <= star_radius and self.rocket_abovethreshold:
-            return True
+            return False
         # Check if any of the rectangle's edges intersect with the circle
         
         return False
@@ -611,14 +611,15 @@ class GameScene:
                     self.rocket_sound_playing = False  # Reset the flag
             self.max_velocity = 50
             self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
-
+            
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
                 if self.rocket_velocity >= 0:
+                    
                     self.rocket_velocity = self.fuelflow 
                 else:
                   
-                    self.rocket_velocity += self.fuelflow 
+                    self.rocket_velocity += 1.1
                 
                 
                
