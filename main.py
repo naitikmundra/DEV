@@ -618,8 +618,7 @@ class GameScene:
                 else:
                     self.rocket_velocity += self.fuelflow  
                 
-                if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
-                    pygame.quit()
+                
                
                 # APPLY GRAVITY
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
