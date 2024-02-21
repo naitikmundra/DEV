@@ -303,7 +303,7 @@ class GameScene:
         self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
-        self.gravitic_accelarationpost = 0.1  # Acceleration rate
+        self.gravitic_accelarationpost = 5  # Acceleration rate
         self.graviticdivision = 20 #Rocket going down and pressing W tweaks
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
@@ -613,30 +613,29 @@ class GameScene:
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-                if self.rocket_velocity > 0:
-                    self.rocket_velocity = self.fuelflow
+                if self.rocket_velocity >= 0:
+                    self.rocket_velocity = self.fuelflow 
                 else:
-                    self.rocket_velocity += self.fuelflow/self.graviticdivision
+                    self.rocket_velocity += self.fuelflow  
                 
                 if self.rocket_velocity + self.fuelflow > self.max_velocity + 20:
                     pygame.quit()
                
-                # Move the rocket based on its velocity
+                # APPLY GRAVITY
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
-                    self.rocket_velocity -= self.gravitic_accelaration 
-                    self.rocket_y -= self.rocket_velocity 
+                    self.rocket_velocity -= self.gravitic_accelarationpost
+                    self.rocket_y -= self.rocket_velocity
+                else:
+                    self.rocket_velocity -= self.gravitic_accelaration
                     
                 
-                # Stop moving the rocket upwards if it reaches the top
-                if self.rocket_y <= 0:
-                    self.rocket_moving_up = False
+              
 
             # Apply gravity when the rocket is not moving upwards
             if not self.rocket_moving_up:
                 # Apply gravity to the rocket
                 self.rocket_velocity -= self.gravitic_accelarationpost  # Decrease velocity due to gravity
-                if self.rocket_velocity < -20:
-                    pygame.quit()
+                
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold:
                     self.rocket_y -= self.rocket_velocity
