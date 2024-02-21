@@ -608,13 +608,14 @@ class GameScene:
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
                 if self.rocket_velocity >= 0:
-                 if self.fuelflow - 2 <  self.rocket_velocity:  
+                 
+                 if self.fuelflow - 2 <  self.rocket_velocity or not self.rocket_abovethreshold:  
                     self.rocket_velocity = self.fuelflow
                  else:
-                     self.rocket_velocity +=1
+                     self.rocket_velocity +=0.3
                 else:
                   
-                    self.rocket_velocity += 1.1
+                    self.rocket_velocity += 0.2
                 
                 
                
