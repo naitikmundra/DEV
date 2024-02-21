@@ -303,6 +303,8 @@ class GameScene:
         self.rocket_velocity = -2 # Initial velocity
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
+        self.gravitic_accelarationpost = 0.1  # Acceleration rate
+
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
         self.rocket_abovethreshold = False
@@ -553,7 +555,7 @@ class GameScene:
                         self.power_on.play()
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
                     
-                elif event.key == pygame.K_w and self.rocket_on and self.fuelflow > 0:
+                elif event.key == pygame.K_w and self.rocket_on and self.scroll_value > 0:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                     # Play the rocket exhaust sound if it's not already playing
@@ -592,15 +594,15 @@ class GameScene:
                             self.scroll_sound.play()
                             self.angle -= math.pi / 18 * self.stiffness * self.scroll_value  # Rotate clockwise with stiffness
                             self.scroll_value -= 1
-                            self.fuelflow -=1
+                            self.fuelflow -=0.1
                     elif event.button == 5:  # Scroll Down
                         if self.scroll_value < 100:
                             self.scroll_sound.play()
                             self.angle += math.pi / 18 * self.stiffness * self.scroll_value  # Rotate anti-clockwise with stiffness
                             self.scroll_value += 1
-                            self.fuelflow +=1
+                            self.fuelflow +=0.1
     def update(self):
-            if self.fuelflow ==0:
+            if self.scroll_value ==0:
                     self.particle_emit = False
                     self.rocket_moving_up = False  # Stop moving the rocket
                     # Stop playing the rocket exhaust sound
@@ -621,7 +623,7 @@ class GameScene:
                
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
-                    self.rocket_velocity -=10
+                    self.rocket_velocity -= self.gravitic_accelaration 
                     self.rocket_y -= self.rocket_velocity 
                     
                 
@@ -632,7 +634,7 @@ class GameScene:
             # Apply gravity when the rocket is not moving upwards
             if not self.rocket_moving_up:
                 # Apply gravity to the rocket
-                self.rocket_velocity -= self.gravitic_accelaration  # Decrease velocity due to gravity
+                self.rocket_velocity -= self.gravitic_accelarationpost  # Decrease velocity due to gravity
                 if self.rocket_velocity < -20:
                     pygame.quit()
                 # Move the rocket based on its velocity
@@ -651,7 +653,7 @@ class GameScene:
     def emit_particles(self):
         now = pygame.time.get_ticks()
         if self.particle_emit and self.rocket_on:
-            for _ in range(self.fuelflow):  # Emit 20 particles at once
+            for _ in range(int(self.scroll_value/2)):  # Emit 20 particles at once
                 # Calculate the offset from the rocket's position based on its rotation angle
                 offset_distance = random.uniform(0, 20)  # Example offset distance
                 offset_angle = random.uniform(-10, 10)  # Example offset angle
