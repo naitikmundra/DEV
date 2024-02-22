@@ -403,9 +403,8 @@ class GameScene:
         if self.alert_timer >= self.alert_duration:
             self.alert_state = not self.alert_state  # Toggle the alert state
             self.alert_timer = 0  # Reset the timer
-        if not self.rocket_moving_up and self.alert_state:
-         if self.rocket_abovethreshold and self.rocket_velocity < 0:
-            self.alert_sound.play()  
+        if  self.rocket_on and self.rocket_velocity < 0 and self.alert_state:
+            self.alert_sound.play(-1)  
             # Create a semi-transparent red surface
             overlay_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
             overlay_surface.fill((255, 0, 0, 50))  # Fill with semi-transparent red color (R, G, B, Alpha)
@@ -550,7 +549,7 @@ class GameScene:
                         self.power_on.play()
                     self.rocket_on = not self.rocket_on  # Toggle the rocket on/off
                     
-                elif event.key == pygame.K_w and self.rocket_on and self.scroll_value > 0:
+                elif event.key == pygame.K_w and self.rocket_on:
                     self.particle_emit = True
                     self.rocket_moving_up = True  # Start moving the rocket upwards when "W" is pressed
                     # Play the rocket exhaust sound if it's not already playing
@@ -601,23 +600,25 @@ class GameScene:
                         self.rocket_exhaust_sound.play(-1)
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
-            if self.rocket_moving_up and self.rocket_on:
-             if self.fuelflow > 0: 
-                self.rocket_velocity += self.acceleration 
-
-
-
-
+            if self.rocket_moving_up and self.rocket_on and round(self.fuelflow) > 0:
+            
+             
+                self.rocket_velocity += self.acceleration
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
                     self.rocket_y -= self.rocket_velocity
+
+        
+
+
+
+
                     
                 
               
 
             # Apply gravity when the rocket is not moving upwards
-            if not self.rocket_moving_up:
-
+            if not self.rocket_moving_up or round(self.fuelflow) == 0:
                 
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold:
@@ -715,7 +716,7 @@ def main():
     screen_height = info.current_h
 
     # Create a fullscreen display
-    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+    screen = pygame.display.set_mode((screen_width , screen_height), pygame.DOUBLEBUF|pygame.FULSCREEN)
 
     # Loading scene
     #loading_scene = LoadingScene(screen, "screenshot.png")
