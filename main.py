@@ -445,6 +445,7 @@ class GameScene:
         self.circle_center[0]+=random.uniform(-shake,shake)
         self.circle_center[1]+=random.uniform(-shake,shake)
         self.acceleration = 0
+        self.rocket_velocity -=0.05
     # Define a function to check collision between rocket and star
 
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
@@ -454,6 +455,7 @@ class GameScene:
         distance = math.sqrt((closest_x - star_x) ** 2 + (closest_y - star_y) ** 2)
         # Check if the distance is less than or equal to the circle's radius
         if distance <= star_radius and self.rocket_abovethreshold:
+            
             self.destroy()
         # Check if any of the rectangle's edges intersect with the circle
         
@@ -462,7 +464,8 @@ class GameScene:
         for star in self.stars:
             star.move()
             # Check collision between rocket and star
-            var = self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 2)
+            if star.radius==10:
+                var = self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 10)
                 
             if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
@@ -728,7 +731,7 @@ def main():
     screen_height = info.current_h
 
     # Create a fullscreen display
-    screen = pygame.display.set_mode((screen_width , screen_height), pygame.DOUBLEBUF|pygame.FULLSCREEN)
+    screen = pygame.display.set_mode((1280 , 720), pygame.DOUBLEBUF)#pygame.FULLSCREEN)
 
     # Loading scene
     #loading_scene = LoadingScene(screen, "screenshot.png")
