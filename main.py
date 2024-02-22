@@ -444,6 +444,7 @@ class GameScene:
         self.rocket_y +=random.uniform(-shake, shake)
         self.circle_center[0]+=random.uniform(-shake,shake)
         self.circle_center[1]+=random.uniform(-shake,shake)
+        self.acceleration = 0
     # Define a function to check collision between rocket and star
 
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
