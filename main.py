@@ -596,12 +596,13 @@ class GameScene:
                             self.fuelflow +=0.1
  
     def update(self):
-
-            self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
+            if self.rocket_moving_up:
+                    
+                        self.rocket_exhaust_sound.play(-1)
 
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-              
+             if self.fuelflow > 0: 
                 self.rocket_velocity += self.acceleration 
 
 
