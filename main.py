@@ -295,9 +295,7 @@ class GameScene:
         self.particles_hit_ground = 0  # Track the number of particles hitting the ground
         self.rocket_moving_up = False  # Flag to indicate if the rocket is moving upwards
         self.rocket_velocity = -2 # Initial velocity
-        self.gravitic_accelaration = 4 # Acceleration rate
-        self.gravitic_accelarationpost = 5  # Acceleration rate
-        self.graviticdivision = 20 #Rocket going down and pressing W tweaks
+
         self.power_on = pygame.mixer.Sound(sounds_folder +"power.mp3")
         self.power_on2 = pygame.mixer.Sound(sounds_folder +"switch.mp3")
         self.rocket_abovethreshold = False
@@ -354,7 +352,8 @@ class GameScene:
         #FUEL MANAGEMENT
         self.fuelflow = 0
        
-
+        self.acceleration = 0.03  # Acceleration rate
+        self.gravitic_accelaration = 0.1  # Acceleration rate
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
         plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
@@ -434,7 +433,10 @@ class GameScene:
                 star_radius = 10
             stars.append(Star(x, y, speed,star_radius))
         return stars
+    def destroy(self):
+        pass
     # Define a function to check collision between rocket and star
+
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
         # Calculate the closest point on the rectangle to the center of the circle
         closest_x = max(rocket_x, min(star_x, rocket_x + self.rocket_width))
@@ -594,37 +596,20 @@ class GameScene:
                             self.fuelflow +=0.1
  
     def update(self):
-            if self.rocket_moving_up:
-                    
-                        self.rocket_exhaust_sound.play(-1)
-            if self.scroll_value ==0:
-                    self.particle_emit = False
-                    self.rocket_moving_up = False  # Stop moving the rocket
-                    # Stop playing the rocket exhaust sound
-                    self.rocket_exhaust_sound.stop()
-                    self.rocket_sound_playing = False  # Reset the flag
-            self.max_velocity = 50
-            
+
+            self.rocket_velocity = max(-self.max_velocity, min(self.max_velocity, self.rocket_velocity))
+
             # Move the rocket upwards continuously while "W" is held down and the rocket is turned on
             if self.rocket_moving_up and self.rocket_on:
-                if self.rocket_velocity >= 0:
-                 
-                 if self.fuelflow - 2 <  self.rocket_velocity or not self.rocket_abovethreshold:  
-                    self.rocket_velocity = self.fuelflow
-                 else:
-                     self.rocket_velocity += self.fuelflow
-                else:
-                  
-                    self.rocket_velocity += self.fuelflow
-                
-                
-               
-                # APPLY GRAVITY WHEN GOING UP
+              
+                self.rocket_velocity += self.acceleration 
+
+
+
+
+                # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold: #only move rocket to certain limit on screen
-                    self.rocket_velocity -= self.gravitic_accelarationpost
                     self.rocket_y -= self.rocket_velocity
-                else:
-                    self.rocket_velocity -= self.gravitic_accelaration
                     
                 
               
@@ -636,7 +621,7 @@ class GameScene:
                 # Move the rocket based on its velocity
                 if not self.rocket_abovethreshold:
                     self.rocket_y -= self.rocket_velocity
-                    self.rocket_velocity -= self.gravitic_accelarationpost
+                    self.rocket_velocity -= self.gravitic_accelaration
                 else:
                 # Apply gravity to the rocket
                     self.rocket_velocity -= self.gravitic_accelaration # Decrease velocity due to gravity           
