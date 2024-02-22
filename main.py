@@ -355,6 +355,10 @@ class GameScene:
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
         self.dstarted = False
+        self.gui_image = pygame.image.load(images_folder+"gui.png").convert_alpha()  # Load GUI image
+
+        self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
+        self.gui_rect = self.gui_image.get_rect()  # Position GUI image
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
         plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
@@ -524,7 +528,8 @@ class GameScene:
         return surf
     def draw_ground(self):
         pygame.draw.rect(self.screen, self.ground_color, (0, self.screen.get_height() - self.groundremover, self.screen.get_width(), 50))
-
+    def draw_gui(self):
+        self.screen.blit(self.gui_image, self.gui_rect)
     def draw_rocket(self):
         # Load the rocket image
 
@@ -706,10 +711,12 @@ class GameScene:
             self.particles.update(self.screen)
             self.particles.draw(self.screen)
             # Draw GUI
+            self.draw_gui()
             self.draw_speedometer()
             self.fps_counter()
             self.alert()
             self.draw_fuelwheel()
+            
             # Update the display
             if self.dstarted == True:
                 self.destroy()
