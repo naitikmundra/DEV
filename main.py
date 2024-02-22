@@ -335,7 +335,7 @@ class GameScene:
         self.distance_travelled= 0
         # Fuel wheel valve parameters
         self.circle_radius = 85
-        self.circle_center = (screen.get_width() /1.486, screen.get_height()/1.178)
+        self.circle_center = [screen.get_width() /1.486, screen.get_height()/1.178]
 
         # Plus symbol parameters
         self.plus_length = self.circle_radius * 2
@@ -354,6 +354,7 @@ class GameScene:
        
         self.acceleration = 0.03  # Acceleration rate
         self.gravitic_accelaration = 0.1  # Acceleration rate
+        self.dstarted = False
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
         plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
@@ -433,7 +434,16 @@ class GameScene:
             stars.append(Star(x, y, speed,star_radius))
         return stars
     def destroy(self):
-        pass
+
+        self.dstarted = True
+        #Implementing Screen Shake with gui
+        shake = 5
+        self.speedometer_x +=  random.uniform(-shake, shake)
+        self.speedometer_y +=  random.uniform(-shake, shake)
+        self.rocket_x +=random.uniform(-shake,shake)
+        self.rocket_y +=random.uniform(-shake, shake)
+        self.circle_center[0]+=random.uniform(-shake,shake)
+        self.circle_center[1]+=random.uniform(-shake,shake)
     # Define a function to check collision between rocket and star
 
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
@@ -443,7 +453,7 @@ class GameScene:
         distance = math.sqrt((closest_x - star_x) ** 2 + (closest_y - star_y) ** 2)
         # Check if the distance is less than or equal to the circle's radius
         if distance <= star_radius and self.rocket_abovethreshold:
-            return False
+            self.destroy()
         # Check if any of the rectangle's edges intersect with the circle
         
         return False
@@ -451,9 +461,8 @@ class GameScene:
         for star in self.stars:
             star.move()
             # Check collision between rocket and star
-            if self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 2):
-                if star.radius==10:
-                    pygame.quit()
+            var = self.check_collision(self.rocket_x, self.rocket_y, self.rocket_width / 2, star.x, star.y, 2)
+                
             if self.rocket_moving_up: #change star movement to create miraj
                 star.rocket = True
                 star.speed = self.rocket_velocity
@@ -698,9 +707,11 @@ class GameScene:
             self.alert()
             self.draw_fuelwheel()
             # Update the display
+            if self.dstarted == True:
+                self.destroy()
             pygame.display.flip()
             self.clock.tick(30)
-
+            
 
 def main():
     # Take a screenshot and save it to a file
@@ -716,7 +727,7 @@ def main():
     screen_height = info.current_h
 
     # Create a fullscreen display
-    screen = pygame.display.set_mode((screen_width , screen_height), pygame.DOUBLEBUF|pygame.FULSCREEN)
+    screen = pygame.display.set_mode((screen_width , screen_height), pygame.DOUBLEBUF|pygame.FULLSCREEN)
 
     # Loading scene
     #loading_scene = LoadingScene(screen, "screenshot.png")

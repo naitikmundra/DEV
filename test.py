@@ -1,71 +1,50 @@
 import pygame
-import math
+import sys
 
 # Initialize Pygame
 pygame.init()
 
-# Set up display
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Rotating Plus Symbol")
+# Set the width and height of the screen (you can adjust as needed)
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Expanding Circle")
 
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+# Define colors
+ORANGE = (255, 165, 0)
+WHITE =  (0,0,0)
+# Specify the coordinates for the center of the circle
+start_x, start_y = 400, 300
 
-# Circle parameters
-circle_radius = 150
-circle_center = (WIDTH // 2, HEIGHT // 2)
-
-# Plus symbol parameters
-plus_length = 300
-plus_width = 10
-plus_color = BLACK
-
-# Angle for rotation
-angle = 0
-scroll_value = 0
-
-# Stiffness factor
-stiffness = 0.005
+# Initial radius of the circle
+radius = 1
 
 # Main loop
 running = True
 while running:
-    screen.fill(WHITE)
-
-    # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = pygame.mouse.get_pos()
-            distance = math.sqrt((mouse_pos[0] - circle_center[0])**2 + (mouse_pos[1] - circle_center[1])**2)
-            if distance <= circle_radius:
-                if event.button == 4:  # Scroll Up
-                    if scroll_value > 0:
-                        angle -= math.pi / 18 * stiffness * scroll_value  # Rotate clockwise with stiffness
-                        scroll_value -= 1
-                elif event.button == 5:  # Scroll Down
-                    if scroll_value < 100:
-                        angle += math.pi / 18 * stiffness * scroll_value  # Rotate anti-clockwise with stiffness
-                        scroll_value += 1
-                print("Scroll Value:", scroll_value)
-        
-    # Calculate the positions of the ends of the plus symbol
-    plus_end1 = (circle_center[0] + plus_length/2 * math.cos(angle), circle_center[1] + plus_length/2 * math.sin(angle))
-    plus_end2 = (circle_center[0] + plus_length/2 * math.cos(angle + math.pi), circle_center[1] + plus_length/2 * math.sin(angle + math.pi))
-    plus_end3 = (circle_center[0] + plus_length/2 * math.cos(angle + math.pi/2), circle_center[1] + plus_length/2 * math.sin(angle + math.pi/2))
-    plus_end4 = (circle_center[0] + plus_length/2 * math.cos(angle - math.pi/2), circle_center[1] + plus_length/2 * math.sin(angle - math.pi/2))
-
-    # Draw the plus symbol
-    pygame.draw.line(screen, plus_color, plus_end1, plus_end2, plus_width)
-    pygame.draw.line(screen, plus_color, plus_end3, plus_end4, plus_width)
-
-    # Draw circle
-    pygame.draw.circle(screen, BLACK, circle_center, circle_radius, 2)
-
+    
+    # Fill the screen with orange color
+    screen.fill(WHITE)
+    
+    # Draw the circle
+    pygame.draw.circle(screen, (0, 0, 0), (start_x, start_y), radius, 1)  # Black outline
+    pygame.draw.circle(screen, ORANGE, (start_x, start_y), radius - 1)  # Orange circle
+    
+    # Update the display
     pygame.display.flip()
+    
+    # Increase the radius
+    radius += 0.1
+    
+    # If the circle expands beyond the screen size, exit the loop
+    if radius >= 100:
+        pygame.quit()
+
+# Wait for a moment before closing the window
+pygame.time.wait(5000)
 
 # Quit Pygame
 pygame.quit()
+sys.exit()
