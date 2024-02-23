@@ -272,7 +272,7 @@ class GameScene:
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.ground_color = WHITE
+        self.ground_color = (50, 50, 50)
         self.rocket_color = (50, 50, 50)  # Dark gray color
         self.rocket_width = 50
         self.rocket_height = 100
@@ -312,12 +312,10 @@ class GameScene:
         self.speedometer_color = YELLOW  # Color of the speedometer rectangle
         self.speedometer_width = 10  # Width of the speedometer rectangle
         self.speedometer_length = 100  # Length of the speedometer rectangle
-        self.speedometer_x = 20  # X-coordinate of the speedometer rectangle
-        self.speedometer_y = screen.get_height() - self.speedometer_length - 20  # Y-coordinate of the speedometer rectangle
         self.max_velocity = 20  # Maximum velocity of the rocket
         # Define variables for adjusting the position of the speedometer
-        self.speedometer_x = screen.get_width()/1.2  # X-coordinate of the speedometer
-        self.speedometer_y = screen.get_height()/1.25  # Y-coordinate of the speedometer
+        self.speedometer_x = screen.get_width()/1.175  # X-coordinate of the speedometer
+        self.speedometer_y = screen.get_height()/1.19  # Y-coordinate of the speedometer
         self.groundremover = 50 #SLOWLY erase ground
         # Inside the GameScene's __init__ method, add the following attributes
         self.alert_duration = 500  # Duration of each state in milliseconds
@@ -334,8 +332,8 @@ class GameScene:
         self.rocket_exhaust_sound.set_volume(0.5)
         self.distance_travelled= 0
         # Fuel wheel valve parameters
-        self.circle_radius = 85
-        self.circle_center = [screen.get_width() /1.486, screen.get_height()/1.178]
+        self.circle_radius = 30
+        self.circle_center = [screen.get_width() /1.58, screen.get_height()/1.048]
 
         # Plus symbol parameters
         self.plus_length = self.circle_radius * 2
@@ -423,7 +421,7 @@ class GameScene:
         fps = str(int(self.clock.get_fps()))
         fps_t = self.font.render(fps , 1, pygame.Color("RED"))
         self.screen.blit(fps_t,(0,0))
-        score = self.font.render(str((self.rocket_velocity)) , 1, pygame.Color("YELLOW"))
+        score = self.font.render(str((int(self.distance_travelled))) , 1, pygame.Color("YELLOW"))
         self.screen.blit(score,(0,20))
    
     def create_stars(self, num_stars, min_speed, max_speed):
@@ -441,13 +439,12 @@ class GameScene:
 
         self.dstarted = True
         #Implementing Screen Shake with gui
-        shake = 5
-        self.speedometer_x +=  random.uniform(-shake, shake)
-        self.speedometer_y +=  random.uniform(-shake, shake)
-        self.rocket_x +=random.uniform(-shake,shake)
-        self.rocket_y +=random.uniform(-shake, shake)
-        self.circle_center[0]+=random.uniform(-shake,shake)
-        self.circle_center[1]+=random.uniform(-shake,shake)
+        shakelimit = 5
+        shake = random.uniform(-shakelimit, shakelimit)
+        self.speedometer_x +=  shake
+        self.rocket_x += shake
+        self.circle_center[0]+= shake
+        self.gui_rect.x += shake
         self.acceleration = 0
         self.rocket_velocity -=0.05
     # Define a function to check collision between rocket and star
