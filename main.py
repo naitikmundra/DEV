@@ -327,6 +327,7 @@ class GameScene:
         self.alert_sound.set_volume(0.9)  # Adjust the volume of the alert sound
         self.rocket_image = pygame.image.load(images_folder+"rocket.png").convert_alpha()
         self.rocket_image = pygame.transform.scale(self.rocket_image, (self.rocket_width, self.rocket_height))
+        self.hit_sound = pygame.mixer.Sound(sounds_folder +"hit.wav")  # Load the alert sound file
 
         # Adjust the volume of the rocket exhaust sound
         self.rocket_exhaust_sound.set_volume(0.5)
@@ -357,6 +358,7 @@ class GameScene:
 
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
+        self.start_time = None
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
         plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
@@ -393,7 +395,7 @@ class GameScene:
         # Calculate the end point of the needle based on the angle of rotation
         needle_end_x = needle_center[0] + needle_length * math.cos(math.radians(angle))
         needle_end_y = needle_center[1] - needle_length * math.sin(math.radians(angle))
-
+        
         # Draw the needle
         pygame.draw.line(self.screen, self.speedometer_color, needle_center, (needle_end_x, needle_end_y), needle_width)
 
@@ -436,18 +438,27 @@ class GameScene:
             stars.append(Star(x, y, speed,star_radius))
         return stars
     def destroy(self):
-
         self.dstarted = True
         #Implementing Screen Shake with gui
         shakelimit = 5
         shake = random.uniform(-shakelimit, shakelimit)
         self.speedometer_x +=  shake
-        self.rocket_x += shake
         self.circle_center[0]+= shake
         self.gui_rect.x += shake
         self.acceleration = 0
         self.rocket_velocity -=0.05
-    # Define a function to check collision between rocket and star
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.start_time
+
+        # If 5 seconds have elapsed, do something
+        if elapsed_time >= 500 and elapsed_time <= 1000:  # 5000 milliseconds = 5 seconds
+            self.rocket_horizontal_velocity =0
+            self.rocket_rotation_angle =0
+        else:
+           if elapsed_time <= 500:
+            self.rocket_horizontal_velocity += 1
+            self.rocket_rotation_angle +=1
+
 
     def check_collision(self,rocket_x, rocket_y, rocket_radius, star_x, star_y, star_radius):
         # Calculate the closest point on the rectangle to the center of the circle
@@ -456,8 +467,12 @@ class GameScene:
         distance = math.sqrt((closest_x - star_x) ** 2 + (closest_y - star_y) ** 2)
         # Check if the distance is less than or equal to the circle's radius
         if distance <= star_radius and self.rocket_abovethreshold:
-            
+            self.start_time = pygame.time.get_ticks() 
+            self.rocket_exhaust_sound.stop()
+            self.hit_sound.play()
             self.destroy()
+        
+
         # Check if any of the rectangle's edges intersect with the circle
         
         return False
