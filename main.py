@@ -359,6 +359,8 @@ class GameScene:
         self.gui_image = pygame.transform.scale(self.gui_image, (screen.get_width(), screen.get_height()))  # Resize GUI image to match screen dimensions
         self.gui_rect = self.gui_image.get_rect()  # Position GUI image
         self.start_time = None
+        self.channel2 = pygame.mixer.Channel(1)
+
     def draw_fuelwheel(self):
         # Calculate the positions of the ends of the plus symbol
         plus_end1 = (self.circle_center[0] + self.plus_length/2 * math.cos(self.angle), self.circle_center[1] + self.plus_length/2 * math.sin(self.angle))
@@ -409,13 +411,14 @@ class GameScene:
             self.alert_state = not self.alert_state  # Toggle the alert state
             self.alert_timer = 0  # Reset the timer
         if  self.rocket_on and self.rocket_velocity < 0 and self.alert_state:
-            self.alert_sound.play(-1)  
+              
             # Create a semi-transparent red surface
             overlay_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
             overlay_surface.fill((255, 0, 0, 50))  # Fill with semi-transparent red color (R, G, B, Alpha)
 
             # Blit the overlay surface onto the screen
             self.screen.blit(overlay_surface, (0, 0))
+            self.channel2.play(self.alert_sound)
         else:
             self.alert_sound.stop() 
 
