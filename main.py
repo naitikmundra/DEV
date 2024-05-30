@@ -52,7 +52,7 @@ class LoadingScene:
         self.min_scale_factor = 0.01
         self.scale_factor_decrement = scale_factor_decrement
         self.clock = pygame.time.Clock()
-        self.loading_sound = pygame.mixer.Sound("loading_sound.wav")  # Load the sound file
+        self.loading_sound = pygame.mixer.Sound("library/sounds/loading_sound.wav")  # Load the sound file
         self.start_time = pygame.time.get_ticks()  # Get the current time
         self.sound_volume = 0.0  # Initial volume level
 
@@ -731,7 +731,9 @@ class GameScene:
             self.fps_counter()
             self.alert()
             self.draw_fuelwheel()
-            
+            if self.rocket_velocity < -25:
+                    menu_scene = MenuScene(self.screen)
+                    menu_scene.run()
             # Update the display
             if self.dstarted == True:
                 self.destroy()
@@ -753,11 +755,11 @@ def main():
     screen_height = info.current_h
 
     # Create a fullscreen display
-    screen = pygame.display.set_mode((1280 , 720), pygame.DOUBLEBUF)#pygame.FULLSCREEN)
+    screen = pygame.display.set_mode((screen_width , screen_height), pygame.DOUBLEBUF | pygame.FULLSCREEN)
 
     # Loading scene
-    #loading_scene = LoadingScene(screen, "screenshot.png")
-    #loading_scene.run()
+    loading_scene = LoadingScene(screen, "screenshot.png")
+    loading_scene.run()
 
     # Menu scene
     menu_scene = MenuScene(screen)
